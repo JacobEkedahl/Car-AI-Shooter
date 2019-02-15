@@ -7,18 +7,21 @@ public class EnemyPlanner {
     public EnemyPlanner(){
     }
 
-    public void remove_destroyed(ref List<GameObject> objects){
-        foreach(GameObject obj in objects){
+    public List<GameObject> remove_destroyed(List<GameObject> enemies){
+        foreach(GameObject obj in enemies){
             if(obj == null){
-                objects.Remove(obj);
+                enemies.Remove(obj);
+                Debug.Log("Removed enemy!");
             }
         }
+
+        return enemies;
     }
 
-    public GameObject get_closest_object(List<GameObject> objects, Vector3 ref_point){
+    public GameObject get_closest_object(List<GameObject> enemies, Vector3 ref_point){
         float smallest_distance = float.MaxValue;
-        GameObject closest_object = objects[0];
-        foreach(GameObject obj in objects) {
+        GameObject closest_object = enemies[0];
+        foreach(GameObject obj in enemies) {
             float distance = Vector3.Distance(obj.transform.position, ref_point);
             if(distance < smallest_distance){
                 smallest_distance = distance;

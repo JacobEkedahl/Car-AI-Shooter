@@ -48,8 +48,6 @@ namespace UnityStandardAssets.Vehicles.Car
             
             if (currIndex == nodesToGoal.Count - 1) {
                 Debug.Log("enemies: " + enemies[currentEnemy+1]);
-                //problem current enemy might be gone! better to plan the path ahead or to check if enemy is dead before doing this
-                enemy_planner.remove_destroyed(ref enemies);
                 GameObject target_enemy = enemy_planner.get_closest_object(enemies, transform.position);
                 nodesToGoal = pathHandler.getPath(transform.position, target_enemy.transform.position);
                 currIndex = 0;
