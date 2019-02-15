@@ -13,9 +13,10 @@ namespace UnityStandardAssets.Vehicles.Car
 
         public GameObject terrain_manager_game_object;
         TerrainManager terrain_manager;
+        EnemyPlanner enemy_planner;
 
         public GameObject[] friends;
-        public GameObject[] enemies;
+        public List<GameObject> enemies;
 
         PathHandler pathHandler;
 
@@ -24,11 +25,12 @@ namespace UnityStandardAssets.Vehicles.Car
             // get the car controller
             m_Car = GetComponent<CarController>();
             terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
+            enemy_planner = new EnemyPlanner();
 
             // note that both arrays will have holes when objects are destroyed
             // but for initial planning they should work
             friends = GameObject.FindGameObjectsWithTag("Player");
-            enemies = GameObject.FindGameObjectsWithTag("Enemy");
+            enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
 
             // Plan your path here
             pathHandler = new PathHandler(terrain_manager);
@@ -41,13 +43,15 @@ namespace UnityStandardAssets.Vehicles.Car
         private List<Vector3> nodesToGoal = new List<Vector3>();
         private int currIndex = 0;
         private void setNextTarget() {
-            if (currIndex < nodesToGoal.Count)
+            if (currIndex < nodesToGoal.Count - 1)
                 currIndex++;
             
-            if (currIndex-1 == nodesToGoal.Count) {
+            if (currIndex == nodesToGoal.Count - 1) {
                 Debug.Log("enemies: " + enemies[currentEnemy+1]);
                 //problem current enemy might be gone! better to plan the path ahead or to check if enemy is dead before doing this
-                nodesToGoal = pathHandler.getPath(transform.position, enemies[++currentEnemy].transform.position);
+                enemy_planner.remove_destroyed(ref enemies);
+                GameObject target_enemy = enemy_planner.get_closest_object(enemies, transform.position);
+                nodesToGoal = pathHandler.getPath(transform.position, target_enemy.transform.position);
                 currIndex = 0;
             }
         }
@@ -59,6 +63,9 @@ namespace UnityStandardAssets.Vehicles.Car
             // Execute your path here
             // ...
 
+
+            Debug.Log("current index: " + currIndex);
+            Debug.Log("nodesToGoal: " + nodesToGoal.Count);
             Vector3 target_node = nodesToGoal[currIndex];
             Vector3 direction = (target_node - transform.position).normalized;
 
