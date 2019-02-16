@@ -18,6 +18,7 @@ namespace UnityStandardAssets.Vehicles.Car {
         PathHandler pathHandler;
         private List<Vector3> nodesToGoal = new List<Vector3> ();
         private int currIndex = 0;
+        private AStar astar;
 
         private void Start () {
             // get the car controller
@@ -31,13 +32,86 @@ namespace UnityStandardAssets.Vehicles.Car {
             enemies = new List<GameObject> (GameObject.FindGameObjectsWithTag ("Enemy"));
 
             // Plan your path here
-            pathHandler = new PathHandler (terrain_manager);
+            // pathHandler = new PathHandler (terrain_manager);
 
             //retrieve the list of nodes from my position to next pos
-            updatePath();
+            GridDiscretization grid = new GridDiscretization (terrain_manager.myInfo);
+            astar = new AStar (grid);
+            updatePath ();
+            // astar.initAstar();
         }
 
+        private void animateAstar () {
+            foreach (Spot spot in astar.closedSet) {
+                spot.Draw (Color.red);
+            }
+
+            foreach (Spot spot in astar.openSet) {
+                spot.Draw (Color.green);
+            }
+
+            DrawPath ();
+        }
+
+        private void DrawPath () {
+            foreach (Spot spot in path) {
+                spot.Draw (Color.yellow);
+            }
+        }
+
+        List<Spot> path = new List<Spot> ();
+
         private void FixedUpdate () {
+            if (astar.openSet.Count > 0) {
+                var winner = 0;
+                for (int index = 0; index < astar.openSet.Count; index++) {
+                    if (astar.openSet[index].f < astar.openSet[winner].f) {
+                        winner = index;
+                    }
+                }
+
+                var current = astar.openSet[winner];
+
+                //find the path
+                if (current == astar.goal) {
+                    var temp = current;
+                    path.Add (temp);
+
+                    while (temp.previous != null) {
+                        path.Add (temp.previous);
+                        temp = temp.previous;
+                    }
+                    Debug.Log ("done!");
+                }
+
+                astar.openSet.Remove (current);
+                astar.closedSet.Add (current);
+
+                var neighbors = current.neighbors;
+                Debug.Log (neighbors.Count);
+
+                for (int k = 0; k < neighbors.Count; k++) {
+                    var neighbor = neighbors[k];
+                    if (!astar.closedSet.Contains (neighbor) && !neighbor.wall) {
+                        var tempG = current.g + 1;
+
+                        if (astar.openSet.Contains (neighbor)) {
+                            if (tempG < neighbor.g) {
+                                neighbor.g = tempG;
+                            }
+                        } else {
+                            neighbor.g = tempG;
+                            astar.openSet.Add (neighbor);
+                        }
+
+                        neighbor.h = astar.heuristic (neighbor, astar.goal);
+                        neighbor.f = neighbor.g + neighbor.h;
+                        neighbor.previous = current;
+                    }
+                }
+                animateAstar ();
+
+            }
 
             Debug.Log ("executing path..");
             // Execute your path here
@@ -69,8 +143,11 @@ namespace UnityStandardAssets.Vehicles.Car {
             }
 
             if (Vector3.Distance (transform.position, target_node) < 3) {
-                setNextTarget ();
+                //  setNextTarget ();
             }
+
+            steering *= dir_car;
+            steering *= dir_car;
 
             // this is how you access information about the terrain
             int i = terrain_manager.myInfo.get_i_index (transform.position.x);
@@ -86,21 +163,37 @@ namespace UnityStandardAssets.Vehicles.Car {
             //m_Car.Move(0f, -1f, 1f, 0f);
         }
 
+        private int dir_car = 1;
+        private bool can_change_dir = true;
+        private void OnCollisionEnter (Collision other) {
+            if (can_change_dir == true) {
+                dir_car *= -1;
+                can_change_dir = false;
+            }
+            Debug.Log ("Crashed!, " + dir_car);
+            //if car is going forward, navigate by reversing else vice versa
+        }
+
+        private void OnCollisionExit (Collision other) {
+            can_change_dir = true;
+        }
+
         private void setNextTarget () {
             if (currIndex < nodesToGoal.Count - 1)
                 currIndex++;
 
             if (currIndex == nodesToGoal.Count - 1) {
-                updatePath ();
+                //  updatePath ();
             }
         }
 
         private void updatePath () {
             enemies = enemy_planner.remove_destroyed (enemies);
             GameObject target_enemy = enemy_planner.get_closest_object (enemies, transform.position);
-            nodesToGoal = pathHandler.getPath (transform.position, target_enemy.transform.position);
-            currIndex = 0;
-            Debug.Log("enemy pos: " + target_enemy.transform.position + ", my pos: " + transform.position);
+            astar.initAstar (transform.position, target_enemy.transform.position);
+            // nodesToGoal = pathHandler.getPath (transform.position, target_enemy.transform.position);
+            // currIndex = 0;
+            //  Debug.Log("enemy pos: " + target_enemy.transform.position + ", my pos: " + transform.position);
         }
     }
 }

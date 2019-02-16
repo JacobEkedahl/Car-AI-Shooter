@@ -19,11 +19,11 @@ public class EnemyPlanner {
     }
 
     public GameObject get_closest_object(List<GameObject> enemies, Vector3 ref_point){
-        float smallest_distance = float.MaxValue;
+        float smallest_distance = float.MinValue;
         GameObject closest_object = enemies[0];
         foreach(GameObject obj in enemies) {
             float distance = Vector3.Distance(obj.transform.position, ref_point);
-            if(distance < smallest_distance){
+            if(distance > smallest_distance){
                 smallest_distance = distance;
                 closest_object = obj;
             }
