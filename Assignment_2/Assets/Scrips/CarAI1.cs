@@ -223,16 +223,28 @@ namespace UnityStandardAssets.Vehicles.Car {
                 //find the path
                 if (Vector3.Distance (current.pos, astar.goal.pos) < dist_to_goal) {
                     nodesToGoal.Clear ();
-                    int counter = 0;
-                    Debug.Log ("done! " + astar.goal.pos);
                     var temp = current;
                     nodesToGoal.Add (temp.pos);
 
                     while (temp.previous != null) {
-                        if (counter++ % 2 == 0) {
-                            nodesToGoal.Add (temp.previous.pos);
-                        }
+                        nodesToGoal.Add (temp.previous.pos);
                         temp = temp.previous;
+                    }
+
+                    int size_of_path = nodesToGoal.Count;
+                    int modVal = 5;
+
+                    if (size_of_path > 20) {
+                        modVal = 10;
+                    } else if (size_of_path < 6) {
+                        modVal = 2;
+                    }
+
+                    for (int node_i = size_of_path - 1; node_i >= 0; node_i--) {
+                        if (node_i % modVal != 0) {
+                            Debug.Log("removed");
+                            nodesToGoal.RemoveAt (node_i);
+                        }
                     }
 
                     nodesToGoal.Reverse ();
