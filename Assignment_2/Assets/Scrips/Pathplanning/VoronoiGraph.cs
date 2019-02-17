@@ -26,6 +26,7 @@ public class VoronoiGraph {
     public int goal_i { get; set; }
     public int goal_j { get; set; }
     public GridDiscretization grid;
+    public int splits{get; set;}
 
     public VoronoiGraph (GridDiscretization grid) {
         this.grid = grid;
@@ -36,13 +37,16 @@ public class VoronoiGraph {
         z_N = grid.z_N;
         this.max_number = fill_grid ();
 
+
         //invert grid distance
+        int divisions = 2;
+        splits = max_number / divisions;
         for (int i = 0; i < x_N; i++) {
             for (int j = 0; j < z_N; j++) {
                 if (grid.discretized_traversibility[i, j] == 1) {
                     grid_distance[i, j] = -1;
                 } else {
-                    grid_distance[i, j] = (max_number - grid_distance[i, j] + 1);
+                    grid_distance[i, j] = (((max_number - grid_distance[i, j]) % splits) * 0.1f) + 1;
                 }
             }
         }

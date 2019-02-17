@@ -16,23 +16,22 @@ public class GridDiscretization {
     public int z_N;
     public float z_step { get; private set; }
 
-
     //TODO: Add function parameter - step size
     public GridDiscretization (TerrainInfo info) {
         x_high = info.x_high;
         x_low = info.x_low;
         //x_N = info.x_N;
         x_N = (int) Mathf.Ceil (x_high - x_low);
-        x_step = 1;//(x_high - x_low) / x_N;
+        x_step = 1; //(x_high - x_low) / x_N;
 
         z_high = info.z_high;
         z_low = info.z_low;
         //z_N = info.z_N;
         z_N = (int) Mathf.Ceil (z_high - z_low);
-        z_step = 1;//(z_high - z_low) / z_N;
+        z_step = 1; //(z_high - z_low) / z_N;
 
-        Debug.Log("x_high: " + x_high + ", x_low: " + x_low + ", x_N: " + x_N + 
-                ", x_step: " + x_step + ", z_high: " + z_high + ", z_step: " + z_step);
+        Debug.Log ("x_high: " + x_high + ", x_low: " + x_low + ", x_N: " + x_N +
+            ", x_step: " + x_step + ", z_high: " + z_high + ", z_step: " + z_step);
 
         if (x_N <= info.x_N && z_N <= info.z_N) {
             // Copy the traversibility info if the original grid size <= 1
@@ -43,7 +42,9 @@ public class GridDiscretization {
             construct_discretized_traversibility (info);
         }
 
-        //expand_obstacles ();
+        for (int i = 0; i < 4; i++) {
+            expand_obstacles ();
+        }
     }
 
     private void expand_obstacles () {
@@ -111,15 +112,15 @@ public class GridDiscretization {
 
     public float get_x_pos (int i) {
         float xPos = x_low + (i * x_step);
-    //    Debug.Log("from grid: " + i+  ", xPos" + xPos);
+        //    Debug.Log("from grid: " + i+  ", xPos" + xPos);
         return xPos;
-     //   return x_low + x_step / 2 + x_step * i;
+        //   return x_low + x_step / 2 + x_step * i;
     }
 
     public float get_z_pos (int j) {
         float zPos = z_low + (j * z_step);
         return zPos;
-      //  return z_low + z_step / 2 + z_step * j;
+        //  return z_low + z_step / 2 + z_step * j;
     }
 
     public int get_i_index (float x) {
