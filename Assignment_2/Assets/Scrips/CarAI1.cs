@@ -125,25 +125,10 @@ namespace UnityStandardAssets.Vehicles.Car {
             }
         }
 
-        private int dir_car = 1;
-        private bool can_change_dir = true;
         private int timer = 100;
-        private void crashed () {
-            // if (can_change_dir == true) {
-            dir_car *= -1;
-            can_change_dir = false;
-            //  }
-            Debug.Log ("Crashed!, " + dir_car);
-        }
-
         private void OnDrawGizmos () {
             Gizmos.color = Color.yellow;
             Gizmos.DrawLine (transform.position, nodesToGoal[currIndex]);
-        }
-
-        private void OnCollisionEnter (Collision other) {
-            //crashed ();
-            //if car is going forward, navigate by reversing else vice versa
         }
 
         private void OnCollisionExit (Collision other) {
@@ -153,12 +138,30 @@ namespace UnityStandardAssets.Vehicles.Car {
         private int coll_timer = 100;
         private void OnCollisionStay (Collision other) {
             if (coll_timer == 100) {
-                go_back = true;
+                if (is_coll_back ()) {
+                    go_back = true;
+                }
             }
 
             coll_timer--;
             if (coll_timer <= 0)
                 coll_timer = 100;
+        }
+
+        private bool is_coll_back () {
+            Vector3 offset_forward = transform.forward * 3;
+            Vector3 offset_side = transform.right * 2;
+            Vector3 left_pos = transform.position + offset_forward + offset_side;
+            Vector3 right_pos = transform.position + offset_forward - offset_side;
+
+            int layerMask = LayerMask.GetMask ("CubeWalls");
+
+            if ((Physics.Linecast (transform.position, left_pos, layerMask)) || 
+                (Physics.Linecast (transform.position, right_pos, layerMask)))
+                {
+                return true;
+            }
+            return false;
         }
 
         private void replan () {
