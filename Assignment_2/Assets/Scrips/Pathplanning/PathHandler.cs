@@ -43,6 +43,6 @@ public class PathHandler {
         return goal_nodes;
         */
 
-        return astar.getPath(from, to);
+        return null;
     }
 }

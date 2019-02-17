@@ -42,13 +42,13 @@ public class AStar {
                     if (grid.grid_distance[obj_i + i, obj_j + j] != -1) {
                         result[0] = obj_i + i;
                         result[1] = obj_j + j;
-                        Debug.Log("i: " + result[0] + ", j: " + result[1] + grid.grid_distance[result[0], result[1]]);
+                        Debug.Log ("i: " + result[0] + ", j: " + result[1] + grid.grid_distance[result[0], result[1]]);
                         has_not_find_start = false;
                         return result;
                     }
                 }
             }
-            size+= 1;
+            size += 1;
         }
 
         return result;
@@ -57,7 +57,7 @@ public class AStar {
     public Spot start { get; set; }
     public Spot goal { get; set; }
     public void initAstar (Vector3 start_pos, Vector3 goal_pos) {
-        clear_grid();
+        clear_grid ();
         openSet = new List<Spot> ();
         closedSet = new List<Spot> ();
 
@@ -69,8 +69,8 @@ public class AStar {
 
         Debug.Log ("i: " + goal_i + ", j: " + goal_j);
 
-        int[] index_start = findNonObstacle(start_i, start_j);
-        int[] index_goal = findNonObstacle(goal_i, goal_j);
+        int[] index_start = findNonObstacle (start_i, start_j);
+        int[] index_goal = findNonObstacle (goal_i, goal_j);
 
         start = grid_spots[index_start[0], index_start[1]];
         goal = grid_spots[index_goal[0], index_goal[1]];
@@ -78,18 +78,17 @@ public class AStar {
         openSet.Add (start);
     }
 
-    private void clear_grid() {
-        for (int i = 0; i < grid_spots.GetLength(0); i++) {
-            for (int j = 0; j < grid_spots.GetLength(1); j++) {
-                grid_spots[i,j].clear();
+    private void clear_grid () {
+        for (int i = 0; i < grid_spots.GetLength (0); i++) {
+            for (int j = 0; j < grid_spots.GetLength (1); j++) {
+                grid_spots[i, j].clear ();
             }
         }
     }
 
-    public List<Vector3> getPath (Vector3 start_pos, Vector3 goal_pos) {
+    public List<Vector3> getPath (Vector3 start_pos) {
         List<Vector3> path = new List<Vector3> ();
-        initAstar (start_pos, goal_pos);
-
+        
         while (openSet.Count > 0) {
             var winner = 0;
             for (int index = 0; index < openSet.Count; index++) {
@@ -99,6 +98,42 @@ public class AStar {
             }
 
             var current = openSet[winner];
+
+            //start orig
+;
+            int dist_to_goal = 3;
+            if (grid.grid_distance[goal.i, goal.j] == -1) {
+                dist_to_goal = 5;
+            }
+
+            //find the path
+            if (Vector3.Distance (current.pos, goal.pos) < dist_to_goal) {
+                var temp = current;
+                path.Add (temp.pos);
+
+                while (temp.previous != null) {
+                    path.Add (temp.previous.pos);
+                    temp = temp.previous;
+                }
+
+                int size_of_path = path.Count;
+                int modVal = 5;
+
+                if (size_of_path > 20) {
+                    modVal = 10;
+                } else if (size_of_path < 6) {
+                    modVal = 2;
+                }
+
+                for (int node_i = size_of_path - 1; node_i >= 0; node_i--) {
+                    if (node_i % modVal != 0) {
+                        path.RemoveAt (node_i);
+                    }
+                }
+
+                path.Reverse ();
+                return path;
+            }
 
             //find the path
             if (current == goal) {
