@@ -16,8 +16,18 @@ namespace UnityStandardAssets.Vehicles.Car {
         public List<GameObject> enemies;
 
         PathHandler pathHandler;
+        List<Vector3> cluster_means;
+        Cluster cluster;
         private List<Vector3> nodesToGoal = new List<Vector3> ();
         private int currIndex = 0;
+
+        void OnDrawGizmos() {
+            Debug.Log("Drawing gizmos...!");
+            Gizmos.color = Color.blue;
+            for(int i = 0; i< cluster_means.Count; i++){
+                Gizmos.DrawSphere(cluster_means[i], 10);
+            }
+        }
 
         private void Start () {
             // get the car controller
@@ -30,6 +40,13 @@ namespace UnityStandardAssets.Vehicles.Car {
             friends = GameObject.FindGameObjectsWithTag ("Player");
             enemies = new List<GameObject> (GameObject.FindGameObjectsWithTag ("Enemy"));
 
+            Cluster cluster = new Cluster(3, terrain_manager);
+            cluster.run();
+            this.cluster_means = cluster.cluster_means;
+            Debug.Log(cluster_means[0]);
+            Debug.Log(cluster_means[1]);
+            Debug.Log(cluster_means[2]);
+
             // Plan your path here
             pathHandler = new PathHandler (terrain_manager);
 
@@ -37,40 +54,53 @@ namespace UnityStandardAssets.Vehicles.Car {
             updatePath();
         }
 
-        private void FixedUpdate () {
-
-            Debug.Log ("executing path..");
-            // Execute your path here
-            // ...
-
-            Debug.Log ("current index: " + currIndex);
-            Debug.Log ("nodesToGoal: " + nodesToGoal.Count);
-            Vector3 target_node = nodesToGoal[currIndex];
+        private List<float> get_car_input(Vector3 target_node){
             Vector3 direction = (target_node - transform.position).normalized;
 
             bool is_to_the_right = Vector3.Dot (direction, transform.right) > 0f;
             bool is_to_the_front = Vector3.Dot (direction, transform.forward) > 0f;
 
-            float steering = 0f;
+            float steering = (Vector3.Angle(direction, transform.forward) / 360) * m_Car.m_MaximumSteerAngle;
             float acceleration = 0;
 
             if (is_to_the_right && is_to_the_front) {
-                steering = 1f;
+                //steering = 1f;
                 acceleration = 1f;
             } else if (is_to_the_right && !is_to_the_front) {
-                steering = -1f;
+                steering *= -1f;
                 acceleration = -1f;
             } else if (!is_to_the_right && is_to_the_front) {
-                steering = -1f;
+                steering *= -1f;
                 acceleration = 1f;
             } else if (!is_to_the_right && !is_to_the_front) {
-                steering = 1f;
+                //steering = 1f;
                 acceleration = -1f;
             }
 
-            if (Vector3.Distance (transform.position, target_node) < 3) {
+            if (m_Car.CurrentSpeed > 20) acceleration = 0;
+
+            List<float> car_input = new List<float>();
+            car_input.Add(steering);
+            car_input.Add(acceleration);
+
+            return car_input;
+        }
+
+        private void FixedUpdate () {
+            Vector3 target_node = nodesToGoal[currIndex];
+
+            while (Vector3.Distance (transform.position, target_node) < 3) {
                 setNextTarget ();
+                target_node = nodesToGoal[currIndex];
             }
+
+            List<float> car_input = get_car_input(target_node);
+            float steering = car_input[0];
+            float acceleration = car_input[1];
+            Debug.Log("steering: " + steering);
+            Debug.Log("acceleration: " + acceleration);
+            Debug.Log("acceleration input: " + m_Car.AccelInput);
+
 
             // this is how you access information about the terrain
             int i = terrain_manager.myInfo.get_i_index (transform.position.x);
