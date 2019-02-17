@@ -98,43 +98,41 @@ namespace UnityStandardAssets.Vehicles.Car {
                 }
 
                 if (Vector3.Distance (transform.position, target_node) < 3) {
-                    setNextTarget ();
+                    //  setNextTarget ();
                 }
 
                 if (current_target == null) {
-                    Debug.Log ("reset!");
-                    enemies = enemy_planner.remove_destroyed (enemies);
-                    currIndex = 0;
-                    can_run = true;
-                    can_update = true;
-                    astar.openSet.Clear ();
+                    replan ();
                 }
 
-                steering *= dir_car;
-                acceleration *= dir_car;
+                if (go_back) {
+                    go_back_routine ();
+                } else {
+                    m_Car.Move (steering, acceleration, acceleration, 0f);
+                }
+                Debug.Log ("coll timer: " + coll_timer);
+            }
+        }
 
-                // this is how you access information about the terrain
-                int i = terrain_manager.myInfo.get_i_index (transform.position.x);
-                int j = terrain_manager.myInfo.get_j_index (transform.position.z);
-                float grid_center_x = terrain_manager.myInfo.get_x_pos (i);
-                float grid_center_z = terrain_manager.myInfo.get_z_pos (j);
-
-                Debug.DrawLine (transform.position, new Vector3 (grid_center_x, 0f, grid_center_z));
-
-                // this is how you control the car
-                //Debug.Log("Steering:" + steering + " Acceleration:" + acceleration);
-                m_Car.Move (steering, acceleration, acceleration, 0f);
-                //m_Car.Move(0f, -1f, 1f, 0f);
+        private bool go_back = false;
+        private void go_back_routine () {
+            if (timer > 0) {
+                timer--;
+                m_Car.Move (0.0f, -1.0f, -1.0f, 0.0f);
+            } else {
+                timer = 100;
+                go_back = false;
             }
         }
 
         private int dir_car = 1;
         private bool can_change_dir = true;
+        private int timer = 100;
         private void crashed () {
-            if (can_change_dir == true) {
-                dir_car *= -1;
-                can_change_dir = false;
-            }
+            // if (can_change_dir == true) {
+            dir_car *= -1;
+            can_change_dir = false;
+            //  }
             Debug.Log ("Crashed!, " + dir_car);
         }
 
@@ -144,21 +142,67 @@ namespace UnityStandardAssets.Vehicles.Car {
         }
 
         private void OnCollisionEnter (Collision other) {
-            //  crashed ();
+            //crashed ();
             //if car is going forward, navigate by reversing else vice versa
         }
 
         private void OnCollisionExit (Collision other) {
-            //  can_change_dir = true;
+            coll_timer = 100;
         }
 
+        private int coll_timer = 100;
         private void OnCollisionStay (Collision other) {
-            //   crashed ();
+            if (coll_timer == 100) {
+                go_back = true;
+            }
+
+            coll_timer--;
+            if (coll_timer <= 0)
+                coll_timer = 100;
+        }
+
+        private void replan () {
+            Debug.Log ("reset!");
+            enemies = enemy_planner.remove_destroyed (enemies);
+            currIndex = 0;
+            can_run = true;
+            can_update = true;
+            astar.openSet.Clear ();
         }
 
         private void setNextTarget () {
             if (currIndex < nodesToGoal.Count - 1)
                 currIndex++;
+        }
+
+        private void findFurthestTarget () {
+            if (nodesToGoal.Count == 0) {
+                Debug.Log ("empty path");
+                return;
+            }
+
+            if (!car_can_see ()) {
+                //car has no vision to path
+                // replan ();
+                //find the closest position we can see, and that the closest node to use can see and add that to our list of nodes
+            }
+        }
+
+        private bool car_can_see () {
+            Vector3 offset = transform.right;
+            offset *= 2;
+            Vector3 right_pos = transform.position + offset;
+            Vector3 left_pos = transform.position - offset;
+
+            for (int i = nodesToGoal.Count - 1; i >= 0; i--) {
+                if (can_see (left_pos, nodesToGoal[i]) && can_see (right_pos, nodesToGoal[i])) {
+                    currIndex = i;
+                    Debug.Log ("new index: " + currIndex);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void load_lineOfSight () {
@@ -168,10 +212,20 @@ namespace UnityStandardAssets.Vehicles.Car {
                 if (enemy == null) {
                     continue;
                 }
-                if (!Physics.Linecast (transform.position, enemy.transform.position)) {
+
+                if (can_see (transform.position, enemy.transform.position)) {
                     lineOfSight_enemies.Add (enemy);
                 }
             }
+        }
+
+        private bool can_see (Vector3 from, Vector3 other_pos) {
+            int layer_mask = LayerMask.GetMask ("CubeWalls");
+            if (!Physics.Linecast (from, other_pos, layer_mask)) {
+                Debug.DrawLine (from, other_pos, Color.green, 5);
+                return true;
+            }
+            return false;
         }
 
         private bool can_update = true;
@@ -242,7 +296,7 @@ namespace UnityStandardAssets.Vehicles.Car {
 
                     for (int node_i = size_of_path - 1; node_i >= 0; node_i--) {
                         if (node_i % modVal != 0) {
-                            Debug.Log("removed");
+                            Debug.Log ("removed");
                             nodesToGoal.RemoveAt (node_i);
                         }
                     }
@@ -251,6 +305,8 @@ namespace UnityStandardAssets.Vehicles.Car {
 
                     can_run = false;
                     DrawPath (nodesToGoal);
+
+                    // findFurthestTarget ();
                     return;
                 }
 
@@ -284,6 +340,8 @@ namespace UnityStandardAssets.Vehicles.Car {
                 if (can_update) {
                     Debug.Log ("is updating");
                     updatePath ();
+                } else {
+                    findFurthestTarget ();
                 }
 
             }
