@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,12 +13,12 @@ namespace UnityStandardAssets.Vehicles.Car
         TerrainManager terrain_manager;
         EnemyPlanner enemy_planner;
 
+        public GameObject cluster_manager_object;
+        TargetHandler target_handler;
+
         public GameObject[] friends;
         public List<GameObject> enemies;
         public List<GameObject> lineOfSight_enemies = new List<GameObject>();
-
-        List<Vector3> cluster_means;
-        Cluster cluster;
 
         private List<Vector3> nodesToGoal = new List<Vector3>();
         private int currIndex = 0; //which node to target
@@ -28,6 +27,11 @@ namespace UnityStandardAssets.Vehicles.Car
 
         private void Start()
         {
+            //Cluster manager, car ask for manager for which targets to find
+            target_handler = cluster_manager_object.GetComponent<TargetHandler>();
+            //Debug.Log("value from targethandler: " + target_handler.no_clusters + ", enemies: " + target_handler.no_enemies);
+            
+
             // get the car controller
             m_Car = GetComponent<CarController>();
             terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
@@ -38,16 +42,25 @@ namespace UnityStandardAssets.Vehicles.Car
             friends = GameObject.FindGameObjectsWithTag("Player");
             enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
 
-            Cluster cluster = new Cluster(3, terrain_manager);
-            cluster.run();
-            this.cluster_means = cluster.cluster_means;
-            Debug.Log(cluster_means[0]);
-            Debug.Log(cluster_means[1]);
-            Debug.Log(cluster_means[2]);
-
             //retrieve the list of nodes from my position to next pos
             GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
             astar = new AStar(grid); //astar loads this grid into a internal voronoigrid
+        }
+
+        private bool has_fetched = false;
+        private void fetch_clusters()
+        {
+            while (!target_handler.has_clustered)
+            {
+                //wait
+            }
+
+            //fetch clusters if not has fetched
+            if (!has_fetched)
+            {
+                enemies = target_handler.getCluster();
+                has_fetched = true;
+            }
         }
 
         List<Spot> path = new List<Spot>();
@@ -56,9 +69,11 @@ namespace UnityStandardAssets.Vehicles.Car
             if (loadTime > 0)
             { //waiting for car to settle after landing from sky
                 loadTime--;
+                go_back_routine(1.0f);
             }
             else
             {
+                fetch_clusters();
                 runAstar();
             }
 
@@ -73,7 +88,10 @@ namespace UnityStandardAssets.Vehicles.Car
 
             if (go_back)
             {
-                go_back_routine();
+                go_back_routine(-1.0f);
+            } else if (go_forward)
+            {
+                go_back_routine(1.0f);
             }
             else
             {
@@ -114,7 +132,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 acceleration = -1f;
             }
 
-            if (m_Car.CurrentSpeed > 20) acceleration = 0;
+            if (m_Car.CurrentSpeed > 30) acceleration = 0;
 
             List<float> car_input = new List<float>();
             car_input.Add(steering);
@@ -172,7 +190,7 @@ namespace UnityStandardAssets.Vehicles.Car
         private bool is_coll_back()
         {
             Vector3 offset_forward = transform.forward * 3;
-            Vector3 offset_side = transform.right * 2;
+            Vector3 offset_side = transform.right * 1;
             Vector3 left_pos = transform.position + offset_forward + offset_side;
             Vector3 right_pos = transform.position + offset_forward - offset_side;
 
@@ -187,32 +205,27 @@ namespace UnityStandardAssets.Vehicles.Car
         }
 
         private bool go_back = false;
-        private void go_back_routine()
+        private void go_back_routine(float dir)
         {
             if (timer > 0)
             {
                 timer--;
-                m_Car.Move(0.0f, -1.0f, -1.0f, 0.0f);
+                m_Car.Move(0.0f, dir, dir, 0.0f);
             }
             else
             {
                 timer = 100;
                 go_back = false;
+                go_forward = false;
             }
         }
+        
 
         private int timer = 100;
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawLine(transform.position, nodesToGoal[currIndex]);
-
-            //Drawing the clusters
-            Gizmos.color = Color.blue;
-            for (int i = 0; i < cluster_means.Count; i++)
-            {
-                Gizmos.DrawSphere(cluster_means[i], 10);
-            }
         }
 
         private void OnCollisionExit(Collision other)
@@ -220,12 +233,25 @@ namespace UnityStandardAssets.Vehicles.Car
             coll_timer = 100;
         }
 
+        private bool go_forward = false;
         private int coll_timer = 100;
         private void OnCollisionStay(Collision other)
         {
             if (coll_timer == 100)
-            {
-                if (is_coll_back())
+            {   
+                if (other.gameObject.tag == "Player")
+                {
+                    Debug.Log("Collision with another player!");
+                    int choice = Random.Range(0, 2);
+                    if (choice == 0)
+                    {
+                        go_back = true;
+                    } else
+                    {
+                        go_forward = true;
+                        Debug.Log("not zero!");
+                    }
+                } else if (is_coll_back())
                 {
                     go_back = true;
                 }
@@ -264,9 +290,10 @@ namespace UnityStandardAssets.Vehicles.Car
         private bool car_can_see()
         {
             Vector3 offset = transform.right;
+            Vector3 offset_forward = -transform.forward;
             offset *= 2;
-            Vector3 right_pos = transform.position + offset;
-            Vector3 left_pos = transform.position - offset;
+            Vector3 right_pos = transform.position + offset_forward + offset;
+            Vector3 left_pos = transform.position + offset_forward + - offset;
 
             for (int i = nodesToGoal.Count - 1; i >= 0; i--)
             {
