@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityStandardAssets.Vehicles.Car {
-    [RequireComponent (typeof (CarController))]
-    public class CarAI1 : MonoBehaviour {
+namespace UnityStandardAssets.Vehicles.Car
+{
+    [RequireComponent(typeof(CarController))]
+    public class CarAI1 : MonoBehaviour
+    {
         private CarController m_Car; // the car controller we want to use
 
         public GameObject terrain_manager_game_object;
@@ -14,31 +16,27 @@ namespace UnityStandardAssets.Vehicles.Car {
 
         public GameObject[] friends;
         public List<GameObject> enemies;
+        public List<GameObject> lineOfSight_enemies = new List<GameObject>();
 
-        PathHandler pathHandler;
         List<Vector3> cluster_means;
         Cluster cluster;
-        private List<Vector3> nodesToGoal = new List<Vector3> ();
-        private int currIndex = 0;
 
-        void OnDrawGizmos() {
-            Debug.Log("Drawing gizmos...!");
-            Gizmos.color = Color.blue;
-            for(int i = 0; i< cluster_means.Count; i++){
-                Gizmos.DrawSphere(cluster_means[i], 10);
-            }
-        }
+        private List<Vector3> nodesToGoal = new List<Vector3>();
+        private int currIndex = 0; //which node to target
+        private AStar astar;
+        private int loadTime = 100;
 
-        private void Start () {
+        private void Start()
+        {
             // get the car controller
-            m_Car = GetComponent<CarController> ();
-            terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager> ();
-            enemy_planner = new EnemyPlanner ();
+            m_Car = GetComponent<CarController>();
+            terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
+            enemy_planner = new EnemyPlanner();
 
             // note that both arrays will have holes when objects are destroyed
             // but for initial planning they should work
-            friends = GameObject.FindGameObjectsWithTag ("Player");
-            enemies = new List<GameObject> (GameObject.FindGameObjectsWithTag ("Enemy"));
+            friends = GameObject.FindGameObjectsWithTag("Player");
+            enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
 
             Cluster cluster = new Cluster(3, terrain_manager);
             cluster.run();
@@ -47,32 +45,71 @@ namespace UnityStandardAssets.Vehicles.Car {
             Debug.Log(cluster_means[1]);
             Debug.Log(cluster_means[2]);
 
-            // Plan your path here
-            pathHandler = new PathHandler (terrain_manager);
-
             //retrieve the list of nodes from my position to next pos
-            updatePath();
+            GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
+            astar = new AStar(grid); //astar loads this grid into a internal voronoigrid
         }
 
-        private List<float> get_car_input(Vector3 target_node){
+        List<Spot> path = new List<Spot>();
+        private void FixedUpdate()
+        {
+            if (loadTime > 0)
+            { //waiting for car to settle after landing from sky
+                loadTime--;
+            }
+            else
+            {
+                runAstar();
+            }
+
+            List<float> car_input = get_car_input();
+            float steering = car_input[0];
+            float acceleration = car_input[1];
+
+            if (current_target == null)
+            {
+                replan();
+            }
+
+            if (go_back)
+            {
+                go_back_routine();
+            }
+            else
+            {
+                m_Car.Move(steering, acceleration, acceleration, 0f);
+            }
+        }
+
+
+        private List<float> get_car_input()
+        {
+            Vector3 target_node = nodesToGoal[currIndex];
             Vector3 direction = (target_node - transform.position).normalized;
 
-            bool is_to_the_right = Vector3.Dot (direction, transform.right) > 0f;
-            bool is_to_the_front = Vector3.Dot (direction, transform.forward) > 0f;
+            bool is_to_the_right = Vector3.Dot(direction, transform.right) > 0f;
+            bool is_to_the_front = Vector3.Dot(direction, transform.forward) > 0f;
 
             float steering = (Vector3.Angle(direction, transform.forward) / 360) * m_Car.m_MaximumSteerAngle;
             float acceleration = 0;
 
-            if (is_to_the_right && is_to_the_front) {
+            if (is_to_the_right && is_to_the_front)
+            {
                 //steering = 1f;
                 acceleration = 1f;
-            } else if (is_to_the_right && !is_to_the_front) {
+            }
+            else if (is_to_the_right && !is_to_the_front)
+            {
                 steering *= -1f;
                 acceleration = -1f;
-            } else if (!is_to_the_right && is_to_the_front) {
+            }
+            else if (!is_to_the_right && is_to_the_front)
+            {
                 steering *= -1f;
                 acceleration = 1f;
-            } else if (!is_to_the_right && !is_to_the_front) {
+            }
+            else if (!is_to_the_right && !is_to_the_front)
+            {
                 //steering = 1f;
                 acceleration = -1f;
             }
@@ -86,51 +123,300 @@ namespace UnityStandardAssets.Vehicles.Car {
             return car_input;
         }
 
-        private void FixedUpdate () {
-            Vector3 target_node = nodesToGoal[currIndex];
+        //Methods used for pathplanning ---------------------------------------------------------
 
-            while (Vector3.Distance (transform.position, target_node) < 3) {
-                setNextTarget ();
-                target_node = nodesToGoal[currIndex];
+        private bool can_run = true;
+        private void runAstar()
+        {
+            if (!can_update && can_run && enemies.Contains(current_target))
+            {
+                nodesToGoal = astar.getPath(transform.position); //goal has already been loaded in updatePath
+                if (nodesToGoal.Count > 0)
+                {
+                    can_run = false;
+                }
             }
-
-            List<float> car_input = get_car_input(target_node);
-            float steering = car_input[0];
-            float acceleration = car_input[1];
-            Debug.Log("steering: " + steering);
-            Debug.Log("acceleration: " + acceleration);
-            Debug.Log("acceleration input: " + m_Car.AccelInput);
-
-
-            // this is how you access information about the terrain
-            int i = terrain_manager.myInfo.get_i_index (transform.position.x);
-            int j = terrain_manager.myInfo.get_j_index (transform.position.z);
-            float grid_center_x = terrain_manager.myInfo.get_x_pos (i);
-            float grid_center_z = terrain_manager.myInfo.get_z_pos (j);
-
-            Debug.DrawLine (transform.position, new Vector3 (grid_center_x, 0f, grid_center_z));
-
-            // this is how you control the car
-            //Debug.Log("Steering:" + steering + " Acceleration:" + acceleration);
-            m_Car.Move (steering, acceleration, acceleration, 0f);
-            //m_Car.Move(0f, -1f, 1f, 0f);
-        }
-
-        private void setNextTarget () {
-            if (currIndex < nodesToGoal.Count - 1)
-                currIndex++;
-
-            if (currIndex == nodesToGoal.Count - 1) {
-                updatePath ();
+            else if (can_update)
+            {
+                updatePath();
+            }
+            else
+            {
+                findFurthestTarget(); //normal running
             }
         }
 
-        private void updatePath () {
-            enemies = enemy_planner.remove_destroyed (enemies);
-            GameObject target_enemy = enemy_planner.get_closest_object (enemies, transform.position);
-            nodesToGoal = pathHandler.getPath (transform.position, target_enemy.transform.position);
+        private bool can_update = true;
+        private GameObject current_target;
+        private void updatePath()
+        {
+            load_lineOfSight();
+
+            if (lineOfSight_enemies.Count > 0)
+            {
+                current_target = enemy_planner.get_closest_object(lineOfSight_enemies, transform.position);
+            }
+            else
+            {
+                current_target = enemy_planner.get_closest_object(enemies, transform.position);
+            }
+
+            astar.initAstar(transform.position, current_target.transform.position);
             currIndex = 0;
-            Debug.Log("enemy pos: " + target_enemy.transform.position + ", my pos: " + transform.position);
+
+            Debug.DrawLine(current_target.transform.position, transform.position, Color.blue, 100);
+            can_update = false;
+        }
+
+        //Methods used for dealing with collisions --------------------------------
+        private bool is_coll_back()
+        {
+            Vector3 offset_forward = transform.forward * 3;
+            Vector3 offset_side = transform.right * 2;
+            Vector3 left_pos = transform.position + offset_forward + offset_side;
+            Vector3 right_pos = transform.position + offset_forward - offset_side;
+
+            int layerMask = LayerMask.GetMask("CubeWalls");
+
+            if ((Physics.Linecast(transform.position, left_pos, layerMask)) ||
+                (Physics.Linecast(transform.position, right_pos, layerMask)))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool go_back = false;
+        private void go_back_routine()
+        {
+            if (timer > 0)
+            {
+                timer--;
+                m_Car.Move(0.0f, -1.0f, -1.0f, 0.0f);
+            }
+            else
+            {
+                timer = 100;
+                go_back = false;
+            }
+        }
+
+        private int timer = 100;
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawLine(transform.position, nodesToGoal[currIndex]);
+
+            //Drawing the clusters
+            Gizmos.color = Color.blue;
+            for (int i = 0; i < cluster_means.Count; i++)
+            {
+                Gizmos.DrawSphere(cluster_means[i], 10);
+            }
+        }
+
+        private void OnCollisionExit(Collision other)
+        {
+            coll_timer = 100;
+        }
+
+        private int coll_timer = 100;
+        private void OnCollisionStay(Collision other)
+        {
+            if (coll_timer == 100)
+            {
+                if (is_coll_back())
+                {
+                    go_back = true;
+                }
+            }
+
+            coll_timer--;
+            if (coll_timer <= 0)
+                coll_timer = 100;
+        }
+
+        //Methods used for following path and demanding new path to be generated --------------
+        private void replan()
+        {
+            Debug.Log("reset!");
+            enemies = enemy_planner.remove_destroyed(enemies);
+            currIndex = 0;
+            can_run = true;
+            can_update = true;
+            astar.openSet.Clear();
+        }
+
+        private void findFurthestTarget()
+        {
+            if (nodesToGoal.Count == 0)
+            {
+                return;
+            }
+
+            //sets target to the furthest visible node on path
+            if (!car_can_see())
+            {
+                //car has no vision to path
+            }
+        }
+
+        private bool car_can_see()
+        {
+            Vector3 offset = transform.right;
+            offset *= 2;
+            Vector3 right_pos = transform.position + offset;
+            Vector3 left_pos = transform.position - offset;
+
+            for (int i = nodesToGoal.Count - 1; i >= 0; i--)
+            {
+                if (can_see(left_pos, nodesToGoal[i]) && can_see(right_pos, nodesToGoal[i]))
+                {
+                    currIndex = i;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool can_see(Vector3 from, Vector3 other_pos)
+        {
+            int layer_mask = LayerMask.GetMask("CubeWalls");
+            if (!Physics.Linecast(from, other_pos, layer_mask))
+            {
+                Debug.DrawLine(from, other_pos, Color.green, 5);
+                return true;
+            }
+            return false;
+        }
+
+        private void load_lineOfSight()
+        {
+            lineOfSight_enemies.Clear();
+
+            foreach (GameObject enemy in enemies)
+            {
+                if (enemy == null)
+                {
+                    continue;
+                }
+
+                if (can_see(transform.position, enemy.transform.position))
+                {
+                    lineOfSight_enemies.Add(enemy);
+                }
+            }
         }
     }
 }
+
+/* Methods used when visualizing the pathfinding algorithm and car movement */
+
+/*
+    private void runAstar () {
+
+        if (astar.openSet.Count > 0 && can_run && !can_update && enemies.Contains (current_target)) {
+            Debug.Log ("calculating path in fixedupdate.., start: " + astar.start.wall + ", goal: " + astar.goal.wall + ", goalpos: " + astar.goal.pos + " target is null: " + (current_target == null));
+            var winner = 0;
+            for (int index = 0; index < astar.openSet.Count; index++) {
+                if (astar.openSet[index].f < astar.openSet[winner].f) {
+                    winner = index;
+                }
+            }
+
+            var current = astar.openSet[winner];
+
+            var goal = astar.goal;
+            int dist_to_goal = 3;
+            if (astar.grid.grid_distance[goal.i, goal.j] == -1) {
+                dist_to_goal = 5;
+            }
+            //find the path
+            if (Vector3.Distance (current.pos, astar.goal.pos) < dist_to_goal) {
+                nodesToGoal.Clear ();
+                var temp = current;
+                nodesToGoal.Add (temp.pos);
+
+                while (temp.previous != null) {
+                    nodesToGoal.Add (temp.previous.pos);
+                    temp = temp.previous;
+                }
+
+                int size_of_path = nodesToGoal.Count;
+                int modVal = 5;
+
+                if (size_of_path > 20) {
+                    modVal = 10;
+                } else if (size_of_path < 6) {
+                    modVal = 2;
+                }
+
+                for (int node_i = size_of_path - 1; node_i >= 0; node_i--) {
+                    if (node_i % modVal != 0) {
+                        Debug.Log ("removed");
+                        nodesToGoal.RemoveAt (node_i);
+                    }
+                }
+
+                nodesToGoal.Reverse ();
+
+                can_run = false;
+                DrawPath (nodesToGoal);
+
+                // findFurthestTarget ();
+                return;
+            }
+
+            astar.openSet.Remove (current);
+            astar.closedSet.Add (current);
+
+            var neighbors = current.neighbors;
+
+            for (int k = 0; k < neighbors.Count; k++) {
+                var neighbor = neighbors[k];
+                if (!astar.closedSet.Contains (neighbor) && !neighbor.wall) {
+                    var tempG = current.g + 1 * astar.getSplit ();
+
+                    if (astar.openSet.Contains (neighbor)) {
+                        if (tempG < neighbor.g) {
+                            neighbor.g = tempG;
+                        }
+                    } else {
+                        neighbor.g = tempG;
+                        astar.openSet.Add (neighbor);
+                    }
+
+                    neighbor.h = astar.heuristic (current.previous, current, neighbor, astar.goal);
+                    neighbor.f = neighbor.g + neighbor.h;
+                    neighbor.previous = current;
+                }
+            }
+            animateAstar ();
+        } else {
+            if (can_update) {
+                Debug.Log ("is updating");
+                updatePath ();
+            } else {
+                findFurthestTarget ();
+            }
+
+        }
+    }
+
+    private void animateAstar () {
+        foreach (Spot spot in astar.closedSet) {
+            spot.Draw (Color.red);
+        }
+
+        foreach (Spot spot in astar.openSet) {
+            spot.Draw (Color.green);
+        }
+    }
+
+    private void DrawPath (List<Vector3> path) {
+        for (int i = 0; i < path.Count - 1; i++) {
+            Debug.DrawLine (path[i], path[i + 1], Color.red, 100);
+        }
+    }
+    */
