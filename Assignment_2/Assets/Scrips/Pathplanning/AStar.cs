@@ -188,18 +188,6 @@ public class AStar {
 
     public float heuristic (Spot prev, Spot from, Spot neighbor, Spot end) {
         float dist_n_goal = dist (neighbor, end);
-        int changedDir = 1;
-
-        /*        if (prev != null) {
-                    float dist_prev_from = dist(prev, from);
-                    float dist_from_n = dist(from, neighbor);
-
-                    if (dist_prev_from != dist_from_n) {
-                        changedDir = 2;
-                    }
-                }
-         */
-        //  Debug.Log ("value neighbor: " + neighbor.value);
         return dist_n_goal * (neighbor.value);
     }
 }
