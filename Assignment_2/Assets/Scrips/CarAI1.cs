@@ -132,7 +132,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 acceleration = -1f;
             }
 
-            if (m_Car.CurrentSpeed > 30) acceleration = 0;
+            if (m_Car.CurrentSpeed > 100) acceleration = 0;
 
             List<float> car_input = new List<float>();
             car_input.Add(steering);
