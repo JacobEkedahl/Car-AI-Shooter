@@ -120,7 +120,7 @@ public class AStar {
                 int modVal = 5;
 
                 if (size_of_path > 20) {
-                    modVal = 10;
+                    modVal = 5;
                 } else if (size_of_path < 6) {
                     modVal = 2;
                 }
