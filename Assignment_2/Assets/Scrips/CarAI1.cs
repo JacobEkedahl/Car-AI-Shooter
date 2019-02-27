@@ -108,7 +108,14 @@ namespace UnityStandardAssets.Vehicles.Car
             bool is_to_the_right = Vector3.Dot(direction, transform.right) > 0f;
             bool is_to_the_front = Vector3.Dot(direction, transform.forward) > 0f;
 
-            float steering = (Vector3.Angle(direction, transform.forward) / 360) * m_Car.m_MaximumSteerAngle;
+            float steering = (Vector3.Angle(direction, transform.forward));
+            if (steering >= 25f) {
+                steering = 1.0f;
+            } else {
+                steering /= 25.0f;
+            }
+
+            Debug.Log("steering: " + steering);
             float acceleration = 0;
 
             if (is_to_the_right && is_to_the_front)
