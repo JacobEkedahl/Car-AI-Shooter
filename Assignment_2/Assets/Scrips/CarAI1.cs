@@ -297,14 +297,20 @@ namespace UnityStandardAssets.Vehicles.Car
         private bool car_can_see()
         {
             Vector3 offset = transform.right;
-            Vector3 offset_forward = -transform.forward;
+            Vector3 offset_backward = -transform.forward * 2;
+            Vector3 offset_forward = transform.forward * 2;
+
+
             offset *= 2;
-            Vector3 right_pos = transform.position + offset_forward + offset;
-            Vector3 left_pos = transform.position + offset_forward + - offset;
+            Vector3 right_pos_forward = transform.position + offset_forward + offset;
+            Vector3 left_pos_forward = transform.position + offset_forward + - offset;
+            Vector3 right_pos_backward = transform.position + offset_backward + offset;
+            Vector3 left_pos_backward = transform.position + offset_backward + -offset;
 
             for (int i = nodesToGoal.Count - 1; i >= 0; i--)
             {
-                if (can_see(left_pos, nodesToGoal[i]) && can_see(right_pos, nodesToGoal[i]))
+                if (can_see(left_pos_forward, nodesToGoal[i]) && can_see(right_pos_forward, nodesToGoal[i]) &&
+                    can_see(left_pos_backward, nodesToGoal[i]) && can_see(right_pos_backward, nodesToGoal[i]))
                 {
                     currIndex = i;
                     return true;
@@ -319,7 +325,7 @@ namespace UnityStandardAssets.Vehicles.Car
             int layer_mask = LayerMask.GetMask("CubeWalls");
             if (!Physics.Linecast(from, other_pos, layer_mask))
             {
-                Debug.DrawLine(from, other_pos, Color.green, 5);
+                Debug.DrawLine(from, other_pos, Color.green, 0.1f);
                 return true;
             }
             return false;
