@@ -61,6 +61,7 @@ public class TargetHandler_Prob1 : MonoBehaviour
             res.Add(row);
         }
 
+       
         Debug.Log("enemies size: " + enemies.Count);
 
         foreach(string s in res)
@@ -70,15 +71,16 @@ public class TargetHandler_Prob1 : MonoBehaviour
         Debug.Log("Width: " + width + ", height: " + height);
     }
 
+    //cars call this method to get one of the generated clusters
     public int current_car = 0;
     public List<GameObject> getCluster()
     {
         return this.clusters[current_car++ % no_clusters];
     }
 
-    private void generateCluster()
+    private void generateCluster(List<GameObject> enemies)
     {
-        Cluster cluster = new Cluster(no_clusters, terrain_manager);
+        Cluster cluster = new Cluster(no_clusters, terrain_manager, enemies);
         cluster.run();
         this.clusters = cluster.clusters;
     }
@@ -87,12 +89,6 @@ public class TargetHandler_Prob1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (no_enemies == 0)
-        {
-            enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
-            no_enemies = enemies.Count;
-        }
-
         if (no_clusters == 0)
         {
             no_clusters = GameObject.FindGameObjectsWithTag("Player").Length;
@@ -101,8 +97,7 @@ public class TargetHandler_Prob1 : MonoBehaviour
         if (no_clusters != 0 && no_enemies != 0 && !has_clustered)
         {
             //do clustering
-            generateCluster();
-
+            generateCluster(enemies);
             //end clustering
             has_clustered = true;
         }
