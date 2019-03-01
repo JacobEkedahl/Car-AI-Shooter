@@ -50,7 +50,7 @@ namespace UnityStandardAssets.Vehicles.Car
             foreach(GameObject box in enemies) {
                 if (box == null) 
                     continue;
-                if (Vector3.Distance(transform.position, box.transform.position) <= 10.0f) {
+                if (Vector3.Distance(transform.position, box.transform.position) <= 3.0f) {
                     Destroy(box);
                     Debug.Log("Destroyed box!");
                 }
@@ -71,6 +71,11 @@ namespace UnityStandardAssets.Vehicles.Car
                 enemies = target_handler.getCluster();
                 Debug.Log("has fetched clusters!");
                 has_fetched = true;
+
+                VRPsolver vrp = new VRPsolver(enemies);
+                vrp.construct_NN_tour(this.gameObject);
+                vrp.two_opt();
+                enemies = new List<GameObject>(vrp.tour);
             }
         }
 
@@ -88,6 +93,7 @@ namespace UnityStandardAssets.Vehicles.Car
 
                 if (has_fetched)
                 {
+
                     runAstar();
 
 
@@ -200,6 +206,16 @@ namespace UnityStandardAssets.Vehicles.Car
 
         private bool can_update = true;
         private GameObject current_target;
+
+        private GameObject get_next_target() {
+            for (int i = 0; i < enemies.Count; i++) {
+                if (!(enemies[i] == null)){
+                    return enemies[i];
+                }
+            }
+            return null;
+        }
+
         private void updatePath()
         {
             load_lineOfSight();
@@ -212,6 +228,8 @@ namespace UnityStandardAssets.Vehicles.Car
             {
                 current_target = enemy_planner.get_closest_object(enemies, transform.position);
             }
+
+            current_target = get_next_target();
 
             astar.initAstar(transform.position, current_target.transform.position);
             currIndex = 0;
@@ -263,6 +281,18 @@ namespace UnityStandardAssets.Vehicles.Car
                 {
                     Gizmos.color = Color.yellow;
                     Gizmos.DrawLine(transform.position, nodesToGoal[currIndex]);
+                }
+
+                Gizmos.color = Color.red;
+                for (int i = 0; i < enemies.Count - 1; i++ ){
+                    if (enemies[i] == null || enemies[i + 1] == null){
+                        continue;
+                    }
+                    Vector3 from = enemies[i].transform.position;
+                    from.y += 1;
+                    Vector3 to = enemies[i + 1].transform.position;
+                    to.y += 1;
+                    Gizmos.DrawLine(from, to);
                 }
             }
         }
