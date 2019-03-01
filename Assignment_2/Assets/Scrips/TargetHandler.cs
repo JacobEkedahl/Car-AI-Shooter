@@ -18,9 +18,7 @@ public class TargetHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
-        
         enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
         no_clusters = GameObject.FindGameObjectsWithTag("Player").Length;
         no_enemies = enemies.Count;
@@ -32,7 +30,7 @@ public class TargetHandler : MonoBehaviour
     }
 
     private void generateCluster() {
-        Cluster cluster = new Cluster(no_clusters, terrain_manager);
+        Cluster cluster = new Cluster(no_clusters, terrain_manager, enemies);
         cluster.run();
         this.clusters = cluster.clusters;
     }                                  

@@ -254,7 +254,6 @@ namespace UnityStandardAssets.Vehicles.Car
             }
         }
         
-
         private int timer = 100;
         private void OnDrawGizmos()
         {
