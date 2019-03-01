@@ -40,7 +40,7 @@ namespace UnityStandardAssets.Vehicles.Car
             // note that both arrays will have holes when objects are destroyed
             // but for initial planning they should work
             friends = GameObject.FindGameObjectsWithTag("Player");
-            enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
+            //enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
 
             //retrieve the list of nodes from my position to next pos
             GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
@@ -155,7 +155,7 @@ namespace UnityStandardAssets.Vehicles.Car
         {
             if (!can_update && can_run && enemies.Contains(current_target))
             {
-                nodesToGoal = astar.getPath(transform.position); //goal has already been loaded in updatePath
+                nodesToGoal = astar.getPath(transform.position, true); //goal has already been loaded in updatePath
                 if (nodesToGoal.Count > 0)
                 {
                     can_run = false;

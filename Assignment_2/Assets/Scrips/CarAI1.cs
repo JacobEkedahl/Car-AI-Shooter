@@ -14,7 +14,7 @@ namespace UnityStandardAssets.Vehicles.Car
         EnemyPlanner enemy_planner;
 
         public GameObject cluster_manager_object;
-        TargetHandler target_handler;
+        TargetHandler_Prob1 target_handler;
 
         public GameObject[] friends;
         public List<GameObject> enemies;
@@ -28,7 +28,7 @@ namespace UnityStandardAssets.Vehicles.Car
         private void Start()
         {
             //Cluster manager, car ask for manager for which targets to find
-            target_handler = cluster_manager_object.GetComponent<TargetHandler>();
+            target_handler = cluster_manager_object.GetComponent<TargetHandler_Prob1>();
             //Debug.Log("value from targethandler: " + target_handler.no_clusters + ", enemies: " + target_handler.no_enemies);
             
 
@@ -40,11 +40,21 @@ namespace UnityStandardAssets.Vehicles.Car
             // note that both arrays will have holes when objects are destroyed
             // but for initial planning they should work
             friends = GameObject.FindGameObjectsWithTag("Player");
-            enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
 
             //retrieve the list of nodes from my position to next pos
             GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
             astar = new AStar(grid); //astar loads this grid into a internal voronoigrid
+        }
+
+        private void remove_close_box() {
+            foreach(GameObject box in enemies) {
+                if (box == null) 
+                    continue;
+                if (Vector3.Distance(transform.position, box.transform.position) <= 10.0f) {
+                    Destroy(box);
+                    Debug.Log("Destroyed box!");
+                }
+            }
         }
 
         private bool has_fetched = false;
@@ -59,6 +69,7 @@ namespace UnityStandardAssets.Vehicles.Car
             if (!has_fetched)
             {
                 enemies = target_handler.getCluster();
+                Debug.Log("has fetched clusters!");
                 has_fetched = true;
             }
         }
@@ -114,8 +125,7 @@ namespace UnityStandardAssets.Vehicles.Car
             } else {
                 steering /= 25.0f;
             }
-
-            Debug.Log("steering: " + steering);
+            
             float acceleration = 0;
 
             if (is_to_the_right && is_to_the_front)
@@ -153,9 +163,11 @@ namespace UnityStandardAssets.Vehicles.Car
         private bool can_run = true;
         private void runAstar()
         {
+            remove_close_box();
             if (!can_update && can_run && enemies.Contains(current_target))
             {
-                nodesToGoal = astar.getPath(transform.position); //goal has already been loaded in updatePath
+                nodesToGoal = astar.getPath(transform.position, true); //goal has already been loaded in updatePath
+                Debug.Log("dist: " + astar.dist_astar(transform.position));
                 if (nodesToGoal.Count > 0)
                 {
                     can_run = false;
@@ -256,7 +268,6 @@ namespace UnityStandardAssets.Vehicles.Car
                     } else
                     {
                         go_forward = true;
-                        Debug.Log("not zero!");
                     }
                 } else if (is_coll_back())
                 {
@@ -272,7 +283,6 @@ namespace UnityStandardAssets.Vehicles.Car
         //Methods used for following path and demanding new path to be generated --------------
         private void replan()
         {
-            Debug.Log("reset!");
             enemies = enemy_planner.remove_destroyed(enemies);
             currIndex = 0;
             can_run = true;
