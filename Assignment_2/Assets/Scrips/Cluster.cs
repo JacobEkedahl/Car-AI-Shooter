@@ -11,12 +11,12 @@ public class Cluster {
     private List<GameObject> enemies;
     public int k;
 
-    public Cluster(int k, TerrainManager terrain_manager){
+    public Cluster(int k, TerrainManager terrain_manager, List<GameObject> enemies){
         this.k = k;
         this.terrain_manager = terrain_manager;
         this.clusters = new List<List<GameObject>>();
         this.cluster_means = new List<Vector3>();
-        this.enemies = new List<GameObject> (GameObject.FindGameObjectsWithTag ("Enemy"));
+        this.enemies = enemies;
 
         for(int i = 0; i < k; i++){
             clusters.Add(new List<GameObject>());
