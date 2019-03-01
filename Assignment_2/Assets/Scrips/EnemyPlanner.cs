@@ -6,13 +6,14 @@ public class EnemyPlanner {
     public EnemyPlanner () { }
 
     public List<GameObject> remove_destroyed (List<GameObject> enemies) {
-        foreach (GameObject obj in enemies) {
-            if (obj == null) {
-                enemies.Remove (obj);
-                Debug.Log ("Removed enemy!");
+        for (int i = enemies.Count -1; i >= 0; i--)
+        {
+            if (enemies[i] == null)
+            {
+                enemies.Remove(enemies[i]);
+                Debug.Log("Removed enemy!");
             }
         }
-
         return enemies;
     }
 
