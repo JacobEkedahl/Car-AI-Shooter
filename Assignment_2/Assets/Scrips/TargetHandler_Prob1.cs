@@ -61,6 +61,8 @@ public class TargetHandler_Prob1 : MonoBehaviour
             res.Add(row);
         }
 
+        Debug.Log("enemies size: " + enemies.Count);
+
         foreach(string s in res)
         {
             Debug.Log(s);

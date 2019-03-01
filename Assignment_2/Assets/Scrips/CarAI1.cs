@@ -21,7 +21,7 @@ namespace UnityStandardAssets.Vehicles.Car
         public List<GameObject> lineOfSight_enemies = new List<GameObject>();
 
         private List<Vector3> nodesToGoal = new List<Vector3>();
-        private int currIndex = 0; //which node to target
+        private int currIndex = -1; //which node to target
         private AStar astar;
         private int loadTime = 100;
 
@@ -85,34 +85,49 @@ namespace UnityStandardAssets.Vehicles.Car
             else
             {
                 fetch_clusters();
-                runAstar();
+
+                if (has_fetched)
+                {
+                    runAstar();
+
+
+                    List<float> car_input = get_car_input();
+                    if (car_input == null)
+                    {
+                        return;
+                    }
+
+                    float steering = car_input[0];
+                    float acceleration = car_input[1];
+
+                    if (current_target == null)
+                    {
+                        replan();
+                    }
+
+                    if (go_back)
+                    {
+                        go_back_routine(-1.0f);
+                    }
+                    else if (go_forward)
+                    {
+                        go_back_routine(1.0f);
+                    }
+                    else
+                    {
+                        m_Car.Move(steering, acceleration, acceleration, 0f);
+                    }
+                }
             }
 
-            List<float> car_input = get_car_input();
-            float steering = car_input[0];
-            float acceleration = car_input[1];
-
-            if (current_target == null)
-            {
-                replan();
-            }
-
-            if (go_back)
-            {
-                go_back_routine(-1.0f);
-            } else if (go_forward)
-            {
-                go_back_routine(1.0f);
-            }
-            else
-            {
-                m_Car.Move(steering, acceleration, acceleration, 0f);
-            }
         }
 
 
         private List<float> get_car_input()
         {
+            if (currIndex == -1 || nodesToGoal.Count == 0)
+                return null;
+            
             Vector3 target_node = nodesToGoal[currIndex];
             Vector3 direction = (target_node - transform.position).normalized;
 
@@ -243,8 +258,14 @@ namespace UnityStandardAssets.Vehicles.Car
         private int timer = 100;
         private void OnDrawGizmos()
         {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(transform.position, nodesToGoal[currIndex]);
+            if(Application.isPlaying)
+            {
+                if (nodesToGoal.Count > 0)
+                {
+                    Gizmos.color = Color.yellow;
+                    Gizmos.DrawLine(transform.position, nodesToGoal[currIndex]);
+                }
+            }
         }
 
         private void OnCollisionExit(Collision other)

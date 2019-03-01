@@ -67,7 +67,7 @@ public class AStar {
         int goal_i = grid.get_i_index (goal_pos.x);
         int goal_j = grid.get_j_index (goal_pos.z);
 
-        Debug.Log ("i: " + goal_i + ", j: " + goal_j);
+      //  Debug.Log ("i: " + goal_i + ", j: " + goal_j);
 
         int[] index_start = findNonObstacle (start_i, start_j);
         int[] index_goal = findNonObstacle (goal_i, goal_j);
