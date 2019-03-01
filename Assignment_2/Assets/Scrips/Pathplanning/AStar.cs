@@ -42,7 +42,7 @@ public class AStar {
                     if (grid.grid_distance[obj_i + i, obj_j + j] != -1) {
                         result[0] = obj_i + i;
                         result[1] = obj_j + j;
-                        Debug.Log ("i: " + result[0] + ", j: " + result[1] + grid.grid_distance[result[0], result[1]]);
+                       // Debug.Log ("i: " + result[0] + ", j: " + result[1] + grid.grid_distance[result[0], result[1]]);
                         has_not_find_start = false;
                         return result;
                     }
@@ -86,7 +86,20 @@ public class AStar {
         }
     }
 
-    public List<Vector3> getPath (Vector3 start_pos) {
+    public float dist_astar(Vector3 start_pos)
+    {
+        float result = 0.0f;
+        List<Vector3> path_to_goal = getPath(start_pos, false);
+
+        for (int i = 0; i < path_to_goal.Count-1; i++)
+        {
+            result += Vector3.Distance(path_to_goal[i], path_to_goal[i + 1]);
+        }
+
+        return result;
+    }
+
+    public List<Vector3> getPath (Vector3 start_pos, bool useVoronoi) {
         List<Vector3> path = new List<Vector3> ();
         
         while (openSet.Count > 0) {
@@ -166,7 +179,13 @@ public class AStar {
                         openSet.Add (neighbor);
                     }
 
-                    neighbor.h = heuristic (current.previous, current, neighbor, goal);
+                    if (useVoronoi)
+                    {
+                        neighbor.h = heuristic(current.previous, current, neighbor, goal);
+                    } else
+                    {
+                        neighbor.h = heuristic_nonWall(neighbor, goal);
+                    }
                     neighbor.f = neighbor.g + neighbor.h;
                     neighbor.previous = current;
                 }
@@ -184,6 +203,11 @@ public class AStar {
 
     public float getSplit () {
         return grid.splits * 0.1f;
+    }
+
+    public float heuristic_nonWall(Spot neighbor, Spot end)
+    {
+        return dist(neighbor, end);
     }
 
     public float heuristic (Spot prev, Spot from, Spot neighbor, Spot end) {
