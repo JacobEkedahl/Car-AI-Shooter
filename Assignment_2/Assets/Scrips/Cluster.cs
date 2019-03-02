@@ -9,6 +9,8 @@ public class Cluster {
     public List<Vector3> cluster_means;
     private TerrainManager terrain_manager;
     private List<GameObject> enemies;
+
+    private AStar aStar;
     public int k;
 
     public Cluster(int k, TerrainManager terrain_manager, List<GameObject> enemies){
@@ -17,6 +19,8 @@ public class Cluster {
         this.clusters = new List<List<GameObject>>();
         this.cluster_means = new List<Vector3>();
         this.enemies = enemies;
+        GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
+        aStar = new AStar(grid); //astar loads this grid into a internal voronoigrid
 
         for(int i = 0; i < k; i++){
             clusters.Add(new List<GameObject>());
@@ -50,7 +54,13 @@ public class Cluster {
             int cluster_id = 0;
             float shortest_distance = float.MaxValue;
             for(int j = 0; j < k; j++){
-                float distance = Vector3.Distance(enemies[i].transform.position, cluster_means[j]);
+                //aStar.initAstar(cluster_means[j], enemies[i].transform.position);
+                //float distance = aStar.dist_astar();
+                Vector3 enemy_pos = enemies[i].transform.position;
+                float distance = Vector3.Distance(enemy_pos, cluster_means[j]);
+                RaycastHit hit;
+                bool hits_wall = Physics.Raycast(cluster_means[j], enemy_pos - cluster_means[j], out hit, Vector3.Distance(cluster_means[j], enemy_pos));
+                if (hits_wall) distance *= 2;
                 if (distance < shortest_distance) {
                     shortest_distance = distance;
                     cluster_id = j;

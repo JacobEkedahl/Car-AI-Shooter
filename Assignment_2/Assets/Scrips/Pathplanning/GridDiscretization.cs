@@ -30,8 +30,8 @@ public class GridDiscretization {
         z_N = (int) Mathf.Ceil (z_high - z_low);
         z_step = 1; //(z_high - z_low) / z_N;
 
-        Debug.Log ("x_high: " + x_high + ", x_low: " + x_low + ", x_N: " + x_N +
-            ", x_step: " + x_step + ", z_high: " + z_high + ", z_step: " + z_step);
+        //Debug.Log ("x_high: " + x_high + ", x_low: " + x_low + ", x_N: " + x_N +
+            //", x_step: " + x_step + ", z_high: " + z_high + ", z_step: " + z_step);
 
         if (x_N <= info.x_N && z_N <= info.z_N) {
             // Copy the traversibility info if the original grid size <= 1

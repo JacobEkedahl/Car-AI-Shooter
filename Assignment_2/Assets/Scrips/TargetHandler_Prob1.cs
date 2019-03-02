@@ -37,7 +37,7 @@ public class TargetHandler_Prob1 : MonoBehaviour
         int height = info.z_N;
         float widthSquare = (info.x_high - info.x_low) / width;
         float heightSquare = (info.z_high - info.z_low) / height;
-        Debug.Log("square width and height: " + widthSquare + ":" + heightSquare + ":" + info.x_N + ":" + info.x_low + ":" + info.x_high);
+        //Debug.Log("square width and height: " + widthSquare + ":" + heightSquare + ":" + info.x_N + ":" + info.x_low + ":" + info.x_high);
         List<string> res = new List<string>();
 
         for (int i = 0; i < width; i ++)
@@ -55,20 +55,22 @@ public class TargetHandler_Prob1 : MonoBehaviour
                     cube.layer = 10; //Waypoint
                     cube.transform.position = new Vector3(x, -0.40f, z);
                     enemies.Add(cube);
-                    Debug.Log("cube: " + cube);
+                    //Debug.Log("cube: " + cube);
                 }
             }
             res.Add(row);
         }
 
        
-        Debug.Log("enemies size: " + enemies.Count);
+        //Debug.Log("enemies size: " + enemies.Count);
 
+        /* 
         foreach(string s in res)
         {
             Debug.Log(s);
         }
         Debug.Log("Width: " + width + ", height: " + height);
+        */
     }
 
     //cars call this method to get one of the generated clusters

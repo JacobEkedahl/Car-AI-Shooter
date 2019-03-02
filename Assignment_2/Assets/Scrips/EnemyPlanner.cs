@@ -11,7 +11,6 @@ public class EnemyPlanner {
             if (enemies[i] == null)
             {
                 enemies.Remove(enemies[i]);
-                Debug.Log("Removed enemy!");
             }
         }
         return enemies;
@@ -38,7 +37,6 @@ public class EnemyPlanner {
             }
         }
 
-        Debug.Log ("closest object: " + closest_object.transform.position);
         return closest_object;
     }
 }

@@ -9,6 +9,8 @@ public class AStar {
     public Spot[, ] grid_spots { get; set; }
     public List<Spot> openSet { get; set; }
     public List<Spot> closedSet { get; set; }
+    
+    public Vector3 start_pos;
 
     public AStar (GridDiscretization grid) {
         openSet = new List<Spot> ();
@@ -57,6 +59,7 @@ public class AStar {
     public Spot start { get; set; }
     public Spot goal { get; set; }
     public void initAstar (Vector3 start_pos, Vector3 goal_pos) {
+        this.start_pos = start_pos;
         clear_grid ();
         openSet = new List<Spot> ();
         closedSet = new List<Spot> ();
@@ -86,7 +89,7 @@ public class AStar {
         }
     }
 
-    public float dist_astar(Vector3 start_pos)
+    public float dist_astar()
     {
         float result = 0.0f;
         List<Vector3> path_to_goal = getPath(start_pos, false);
