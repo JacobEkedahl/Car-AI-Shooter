@@ -235,6 +235,8 @@ namespace UnityStandardAssets.Vehicles.Car
             //}
 
 
+            current_target = get_next_target();
+
             astar.initAstar(transform.position, current_target.transform.position);
             currIndex = 0;
 
