@@ -12,7 +12,7 @@ public class VRPsolver {
         this.terrain_manager = terrain_manager;
 
         GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
-        this.aStar = new AStar(grid); //astar loads this grid into a internal voronoigrid
+        //this.aStar = new AStar(grid); //astar loads this grid into a internal voronoigrid
     }
 
     public void construct_NN_tour(GameObject start_node){

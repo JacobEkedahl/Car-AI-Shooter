@@ -14,7 +14,7 @@ public class PathHandler {
     public PathHandler (TerrainManager terrain_manager) {
         this.terrain_manager = terrain_manager;
         this.grid = new GridDiscretization (terrain_manager.myInfo);
-        this.astar = new AStar(grid);
+       // this.astar = new AStar(grid);
     }
 
     public List<Vector3> getPath (Vector3 from, Vector3 to) {

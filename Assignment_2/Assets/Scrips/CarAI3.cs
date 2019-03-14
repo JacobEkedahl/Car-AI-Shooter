@@ -44,7 +44,7 @@ namespace UnityStandardAssets.Vehicles.Car
 
             //retrieve the list of nodes from my position to next pos
             GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
-            astar = new AStar(grid); //astar loads this grid into a internal voronoigrid
+            astar = new AStar(grid, true); //astar loads this grid into a internal voronoigrid
         }
 
         private bool has_fetched = false;

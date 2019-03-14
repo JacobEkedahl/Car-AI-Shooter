@@ -44,14 +44,14 @@ namespace UnityStandardAssets.Vehicles.Car
 
             //retrieve the list of nodes from my position to next pos
             GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
-            astar = new AStar(grid); //astar loads this grid into a internal voronoigrid
+            astar = new AStar(grid, false); //astar loads this grid into a internal voronoigrid, the targets are not turrets
         }
 
         private void remove_close_box() {
             foreach(GameObject box in enemies) {
                 if (box == null) 
                     continue;
-                if (Vector3.Distance(transform.position, box.transform.position) <= 7.0f) {
+                if (Vector3.Distance(transform.position, box.transform.position) <= 3.0f) {
                     Destroy(box);
                 }
             }
@@ -81,6 +81,7 @@ namespace UnityStandardAssets.Vehicles.Car
         List<Spot> path = new List<Spot>();
         private void FixedUpdate()
         {
+            //Time.timeScale = 10.0f;
             if (loadTime > 0)
             { //waiting for car to settle after landing from sky
                 loadTime--;
@@ -144,6 +145,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 steering = 1.0f;
             } else {
                 steering /= 25.0f;
+                Debug.Log("new steering:" + steering);
             }
             
             float acceleration = 0;
@@ -294,8 +296,8 @@ namespace UnityStandardAssets.Vehicles.Car
                     if (enemies[i] == null) {
                         continue;
                     }
-                    Gizmos.color = Color.blue;
-                    Gizmos.DrawLine(transform.position, enemies[i].transform.position);
+                   // Gizmos.color = Color.blue;
+                   // Gizmos.DrawLine(transform.position, enemies[i].transform.position);
 
                     Gizmos.color = Color.red;
                     if (enemies[i + 1] == null){

@@ -9,10 +9,12 @@ public class AStar {
     public Spot[, ] grid_spots { get; set; }
     public List<Spot> openSet { get; set; }
     public List<Spot> closedSet { get; set; }
-    
+
+    private Boolean turretTarget;
     public Vector3 start_pos;
 
-    public AStar (GridDiscretization grid) {
+    public AStar (GridDiscretization grid, Boolean turretTarget) {
+        this.turretTarget = turretTarget;
         openSet = new List<Spot> ();
         closedSet = new List<Spot> ();
 
@@ -72,12 +74,18 @@ public class AStar {
 
       //  Debug.Log ("i: " + goal_i + ", j: " + goal_j);
 
-        int[] index_start = findNonObstacle (start_i, start_j);
-        int[] index_goal = findNonObstacle (goal_i, goal_j);
+        if (turretTarget)
+        {
+           int[] index_start = findNonObstacle(start_i, start_j);
+           int[] index_goal = findNonObstacle(goal_i, goal_j);
 
-        start = grid_spots[index_start[0], index_start[1]];
-        goal = grid_spots[index_goal[0], index_goal[1]];
-
+           start = grid_spots[index_start[0], index_start[1]];
+           goal = grid_spots[index_goal[0], index_goal[1]];
+        } else
+        {
+            start = grid_spots[start_i, start_j];
+            goal = grid_spots[goal_i, goal_j];
+        }
         openSet.Add (start);
     }
 
