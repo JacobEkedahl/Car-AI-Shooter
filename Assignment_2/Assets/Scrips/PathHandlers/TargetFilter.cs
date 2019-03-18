@@ -14,16 +14,11 @@ namespace Assets.Scrips.PathHandlers
             List<CubeTarget> chosenTargets = new List<CubeTarget>();
             List<GameObject> I = new List<GameObject>();
             List<GameObject> enemies = new List<GameObject>();
-
-          //  while (enemies.Count == 0)
-           // {
-                Debug.Log("trying to find enemies");
-                enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
-          //  }
-          //  Debug.Log("init size: " + enemies.Count);
-
-            for (int i = 0; i < 10; i++) { 
-          //while (!isEqual(I, enemies)) {
+            
+            enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
+            Debug.Log("trying to find enemies, " + enemies.Count);
+          //  for (int i = 0; i < 10; i++) { 
+            while (!isEqual(I, enemies)) {
                 int biggestDifference = int.MinValue;
                 CubeTarget chosenTarget = null;
                 foreach (CubeTarget target in targets)

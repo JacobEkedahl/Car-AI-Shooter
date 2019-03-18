@@ -21,9 +21,8 @@ namespace UnityStandardAssets.Vehicles.Car
         public List<GameObject> lineOfSight_enemies = new List<GameObject>();
 
         private List<Vector3> nodesToGoal = new List<Vector3>();
-        private int currIndex = -1; //which node to target
+        private int currIndex = 0; //which node to target
         private AStar astar;
-        private VRPsolver vrp;
         private int loadTime = 100;
 
         private void Start()
@@ -41,23 +40,11 @@ namespace UnityStandardAssets.Vehicles.Car
             // note that both arrays will have holes when objects are destroyed
             // but for initial planning they should work
             friends = GameObject.FindGameObjectsWithTag("Player");
+            //enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
 
             //retrieve the list of nodes from my position to next pos
             GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
-            astar = new AStar(grid, false); //astar loads this grid into a internal voronoigrid, the targets are not turrets
-        }
-
-        private void remove_close_box()
-        {
-            foreach (GameObject box in enemies)
-            {
-                if (box == null)
-                    continue;
-                if (Vector3.Distance(transform.position, box.transform.position) <= 3.0f)
-                {
-                    Destroy(box);
-                }
-            }
+            astar = new AStar(grid, true); //astar loads this grid into a internal voronoigrid
         }
 
         private bool has_fetched = false;
@@ -73,18 +60,12 @@ namespace UnityStandardAssets.Vehicles.Car
             {
                 enemies = target_handler.getCluster();
                 has_fetched = true;
-
-                this.vrp = new VRPsolver(enemies, terrain_manager);
-                this.vrp.construct_NN_tour(this.gameObject);
-                this.vrp.two_opt();
-                enemies = new List<GameObject>(vrp.tour);
             }
         }
 
         List<Spot> path = new List<Spot>();
         private void FixedUpdate()
         {
-            //Time.timeScale = 10.0f;
             if (loadTime > 0)
             { //waiting for car to settle after landing from sky
                 loadTime--;
@@ -93,50 +74,35 @@ namespace UnityStandardAssets.Vehicles.Car
             else
             {
                 fetch_clusters();
-
-                if (has_fetched)
-                {
-
-                    runAstar();
-
-
-                    List<float> car_input = get_car_input();
-                    if (car_input == null)
-                    {
-                        return;
-                    }
-
-                    float steering = car_input[0];
-                    float acceleration = car_input[1];
-
-                    if (current_target == null)
-                    {
-                        replan();
-                    }
-
-                    if (go_back)
-                    {
-                        go_back_routine(-1.0f);
-                    }
-                    else if (go_forward)
-                    {
-                        go_back_routine(1.0f);
-                    }
-                    else
-                    {
-                        m_Car.Move(steering, acceleration, acceleration, 0f);
-                    }
-                }
+                runAstar();
             }
 
+            List<float> car_input = get_car_input();
+            float steering = car_input[0];
+            float acceleration = car_input[1];
+
+            if (current_target == null)
+            {
+                replan();
+            }
+
+            if (go_back)
+            {
+                go_back_routine(-1.0f);
+            }
+            else if (go_forward)
+            {
+                go_back_routine(1.0f);
+            }
+            else
+            {
+                m_Car.Move(steering, acceleration, acceleration, 0f);
+            }
         }
 
 
         private List<float> get_car_input()
         {
-            if (currIndex == -1 || nodesToGoal.Count == 0)
-                return null;
-
             Vector3 target_node = nodesToGoal[currIndex];
             Vector3 direction = (target_node - transform.position).normalized;
 
@@ -176,13 +142,26 @@ namespace UnityStandardAssets.Vehicles.Car
                 acceleration = -1f;
             }
 
-            if (m_Car.CurrentSpeed > 17) acceleration = 0;
+            if (m_Car.CurrentSpeed > 20) acceleration = 0;
 
             List<float> car_input = new List<float>();
             car_input.Add(steering);
             car_input.Add(acceleration);
 
             return car_input;
+        }
+
+        private void remove_close_box()
+        {
+            foreach (GameObject box in enemies)
+            {
+                if (box == null)
+                    continue;
+                if (Vector3.Distance(transform.position, box.transform.position) <= 3.0f)
+                {
+                    Destroy(box);
+                }
+            }
         }
 
         //Methods used for pathplanning ---------------------------------------------------------
@@ -211,42 +190,18 @@ namespace UnityStandardAssets.Vehicles.Car
 
         private bool can_update = true;
         private GameObject current_target;
-
-        private GameObject get_next_target()
-        {
-            for (int i = 0; i < enemies.Count; i++)
-            {
-                if (!(enemies[i] == null))
-                {
-                    return enemies[i];
-                }
-            }
-            return null;
-        }
-
         private void updatePath()
         {
             load_lineOfSight();
 
-            //if (lineOfSight_enemies.Count > 0)
-            //{
-            //current_target = enemy_planner.get_closest_object(lineOfSight_enemies, transform.position);
-            //}
-            //else
-            //{
-            //current_target = enemy_planner.get_closest_object(enemies, transform.position);
-            //vrp.construct_NN_tour(this.gameObject);
-            //vrp.two_opt();
-            //enemies = new List<GameObject>(vrp.tour);
-            current_target = get_next_target();
-            if (current_target == null)
+            if (lineOfSight_enemies.Count > 0)
             {
-                current_target = this.gameObject;
+                current_target = enemy_planner.get_closest_object(lineOfSight_enemies, transform.position);
             }
-            //}
-
-
-            current_target = get_next_target();
+            else
+            {
+                current_target = enemy_planner.get_closest_object(enemies, transform.position);
+            }
 
             astar.initAstar(transform.position, current_target.transform.position);
             currIndex = 0;
@@ -289,39 +244,12 @@ namespace UnityStandardAssets.Vehicles.Car
             }
         }
 
+
         private int timer = 100;
         private void OnDrawGizmos()
         {
-            if (Application.isPlaying)
-            {
-                if (nodesToGoal.Count > 0)
-                {
-                    Gizmos.color = Color.yellow;
-                    Gizmos.DrawLine(transform.position, nodesToGoal[currIndex]);
-                }
-
-                Gizmos.color = Color.red;
-                for (int i = 0; i < enemies.Count - 1; i++)
-                {
-                    if (enemies[i] == null)
-                    {
-                        continue;
-                    }
-                    // Gizmos.color = Color.blue;
-                    // Gizmos.DrawLine(transform.position, enemies[i].transform.position);
-
-                    Gizmos.color = Color.red;
-                    if (enemies[i + 1] == null)
-                    {
-                        continue;
-                    }
-                    Vector3 from = enemies[i].transform.position;
-                    from.y += 1;
-                    Vector3 to = enemies[i + 1].transform.position;
-                    to.y += 1;
-                    Gizmos.DrawLine(from, to);
-                }
-            }
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawLine(transform.position, nodesToGoal[currIndex]);
         }
 
         private void OnCollisionExit(Collision other)
@@ -337,6 +265,7 @@ namespace UnityStandardAssets.Vehicles.Car
             {
                 if (other.gameObject.tag == "Player")
                 {
+                    Debug.Log("Collision with another player!");
                     int choice = Random.Range(0, 2);
                     if (choice == 0)
                     {
@@ -345,6 +274,7 @@ namespace UnityStandardAssets.Vehicles.Car
                     else
                     {
                         go_forward = true;
+                        Debug.Log("not zero!");
                     }
                 }
                 else if (is_coll_back())
@@ -361,6 +291,7 @@ namespace UnityStandardAssets.Vehicles.Car
         //Methods used for following path and demanding new path to be generated --------------
         private void replan()
         {
+            Debug.Log("reset!");
             enemies = enemy_planner.remove_destroyed(enemies);
             currIndex = 0;
             can_run = true;

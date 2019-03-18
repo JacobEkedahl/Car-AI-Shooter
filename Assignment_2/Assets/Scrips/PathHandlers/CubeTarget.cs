@@ -36,8 +36,8 @@ namespace Assets.Scrips.PathHandlers
 
         private void load_lineOfSight(GameObject cube)
         {
-            lineOfSight_enemies.Clear();
             List<GameObject> enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
+            lineOfSight_enemies.Clear();
             
             foreach (GameObject enemy in enemies)
             {
@@ -58,7 +58,6 @@ namespace Assets.Scrips.PathHandlers
             int layer_mask = LayerMask.GetMask("CubeWalls");
             if (!Physics.Linecast(from, other_pos, layer_mask))
             {
-                Debug.DrawLine(from, other_pos, Color.green, 0.1f);
                 return true;
             }
             return false;

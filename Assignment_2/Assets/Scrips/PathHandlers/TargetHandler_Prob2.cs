@@ -1,5 +1,4 @@
 using Assets.Scrips.PathHandlers;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,25 +20,28 @@ public class TargetHandler_Prob2 : MonoBehaviour
     void Start()
     {
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
-
-        //instantiate enemies
-        //loop through the terrain and if not obstacle instatiate a cube
         info = terrain_manager.myInfo;
-        addEnemies();
 
         no_clusters = GameObject.FindGameObjectsWithTag("Player").Length;
-        no_enemies = enemies.Count;
     }
 
-    public void addEnemies()
+    public int current_car = 0;
+    public List<GameObject> getCluster()
+    {
+        return this.clusters[current_car++ % no_clusters];
+    }
+
+
+    public void addEnemies(TerrainInfo info)
     {
         enemies = new List<GameObject>();
         int width = info.x_N;
         int height = info.z_N;
         float widthSquare = (info.x_high - info.x_low) / width;
         float heightSquare = (info.z_high - info.z_low) / height;
-
+        //Debug.Log("square width and height: " + widthSquare + ":" + heightSquare + ":" + info.x_N + ":" + info.x_low + ":" + info.x_high);
         List<CubeTarget> targets = new List<CubeTarget>();
+        List<GameObject> tmpCubes = new List<GameObject>();
 
         for (int i = 0; i < width; i++)
         {
@@ -51,47 +53,63 @@ public class TargetHandler_Prob2 : MonoBehaviour
                 {
                     float x = info.x_low + (i * widthSquare) + (widthSquare / 2);
                     float z = info.x_low + (j * heightSquare) + (heightSquare / 2);
+                    // Debug.Log("creating cube at: " + x + ":" + z);
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.layer = 10; //Waypoint
                     cube.transform.position = new Vector3(x, -0.40f, z);
                     targets.Add(new CubeTarget(cube));
+                    tmpCubes.Add(cube);
+
                 }
             }
         }
 
         enemies = TargetFilter.filter(targets);
+
+        foreach(GameObject cube in tmpCubes) {
+            if (!enemies.Contains(cube)) {
+                Destroy(cube);
+            }
+        }
+
+        Debug.Log("found enemies!");
+        hasEnemies = true;
     }
 
-    //cars call this method to get one of the generated clusters
-    public int current_car = 0;
-    public List<GameObject> getCluster()
-    {
-        return this.clusters[current_car++ % no_clusters];
-    }
 
-    private void generateCluster(List<GameObject> enemies)
+    private void generateCluster()
     {
+        Debug.Log("enemies in generate: " + enemies.Count);
         Cluster cluster = new Cluster(no_clusters, terrain_manager, enemies);
         cluster.run();
         this.clusters = cluster.clusters;
     }
 
+    public bool hasEnemies { get; set; } = false;
+    private bool isCalculating = false;
     public bool has_clustered { get; set; } = false;
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        if (no_clusters == 0)
+	    if (no_clusters == 0)
+	    {
+		    no_clusters = GameObject.FindGameObjectsWithTag("Player").Length;
+	    }
+
+	    if (GameObject.FindGameObjectsWithTag("Enemy").Length != 0 && !isCalculating)
         {
-            no_clusters = GameObject.FindGameObjectsWithTag("Player").Length;
+            Debug.Log("is finding enemies!");
+            isCalculating = true;
+            addEnemies(info);
         }
 
-        if (no_clusters != 0 && no_enemies != 0 && !has_clustered)
-        {
-            addEnemies();
-            //do clustering
-            generateCluster(enemies);
-            //end clustering
-            has_clustered = true;
-        }
+	    if (no_clusters != 0 && hasEnemies && !has_clustered)
+	    {
+		    //do clustering
+		    generateCluster();
+
+		    //end clustering
+		    has_clustered = true;
+	    }
     }
 }
