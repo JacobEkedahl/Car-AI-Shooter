@@ -14,6 +14,7 @@ public class Cluster {
     public int k;
 
     public Cluster(int k, TerrainManager terrain_manager, List<GameObject> enemies){
+        Debug.Log("in cluster: " + enemies.Count);
         this.k = k;
         this.terrain_manager = terrain_manager;
         this.clusters = new List<List<GameObject>>();
