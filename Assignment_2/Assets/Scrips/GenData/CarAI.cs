@@ -5,127 +5,101 @@ using UnityEngine;
 namespace UnityStandardAssets.Vehicles.Car
 {
     [RequireComponent(typeof(CarController))]
-    public class CarAI1 : MonoBehaviour
+    public class CarAI : MonoBehaviour
     {
         private CarController m_Car; // the car controller we want to use
+        public GameObject target_handler;
 
         public GameObject terrain_manager_game_object;
         TerrainManager terrain_manager;
         EnemyPlanner enemy_planner;
+        CarManager generator;
 
-        public GameObject cluster_manager_object;
-        TargetHandler_Prob1 target_handler;
-
-        public GameObject[] friends;
         public List<GameObject> enemies;
         public List<GameObject> lineOfSight_enemies = new List<GameObject>();
 
-        private List<Vector3> nodesToGoal = new List<Vector3>();
+        private List<Vector3> nodesToGoal;
         private int currIndex = -1; //which node to target
         private AStar astar;
-        private VRPsolver vrp;
-        private int loadTime = 100;
+
+        public bool hasEnemies { get; set; } = false;
+        public void setEnemies(List<GameObject> objects) {
+            enemies = objects;
+            hasEnemies = true;
+        }
 
         private void Start()
         {
             //Cluster manager, car ask for manager for which targets to find
-            target_handler = cluster_manager_object.GetComponent<TargetHandler_Prob1>();
-            //Debug.Log("value from targethandler: " + target_handler.no_clusters + ", enemies: " + target_handler.no_enemies);
-            
+            generator = target_handler.GetComponent<CarManager>();
+            nodesToGoal = new List<Vector3>();
 
             // get the car controller
             m_Car = GetComponent<CarController>();
             terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
             enemy_planner = new EnemyPlanner();
 
-            // note that both arrays will have holes when objects are destroyed
-            // but for initial planning they should work
-            friends = GameObject.FindGameObjectsWithTag("Player");
-
             //retrieve the list of nodes from my position to next pos
             GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
             astar = new AStar(grid, false); //astar loads this grid into a internal voronoigrid, the targets are not turrets
         }
-
-        private void remove_close_box() {
-            foreach(GameObject box in enemies) {
-                if (box == null) 
-                    continue;
-                if (Vector3.Distance(transform.position, box.transform.position) <= 3.0f) {
-                    Destroy(box);
-                }
+        
+        private void remove_close_box()
+        {
+            if (Vector3.Distance(transform.position, enemies[0].transform.position) <= 3.0f)
+            {
+                Debug.Log("reached target");
+                generator.reachedTarget = true;
+                respawn();
             }
         }
 
-        private bool has_fetched = false;
-        private void fetch_clusters()
-        {
-            while (!target_handler.has_clustered)
-            {
-                //wait
-            }
-
-            //fetch clusters if not has fetched
-            if (!has_fetched)
-            {
-                enemies = target_handler.getCluster();
-                has_fetched = true;
-
-                this.vrp = new VRPsolver(enemies, terrain_manager);
-                this.vrp.construct_NN_tour(this.gameObject);
-                this.vrp.two_opt();
-                enemies = new List<GameObject>(vrp.tour);
-            }
+        private void respawn() {
+            enemies.Clear();
+            gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
+            gameObject.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+            transform.position = new Vector3(220.0f, 0.5f, 230.0f);
+            transform.eulerAngles = new Vector3(10, generator.getRotation(), 0);
+            current_target = null;
         }
 
         List<Spot> path = new List<Spot>();
         private void FixedUpdate()
         {
-            //Time.timeScale = 10.0f;
-            if (loadTime > 0)
-            { //waiting for car to settle after landing from sky
-                loadTime--;
-                go_back_routine(1.0f);
-            }
-            else
+            if (generator.canFetch() && !generator.hasFetched)
             {
-                fetch_clusters();
-
-                if (has_fetched)
+                Debug.Log("fetching enemies!");
+                enemies = generator.getTargets();
+            } else if (generator.hasFetched) {
+                Debug.Log("has fetched!");
+                runAstar();
+                List<float> car_input = get_car_input();
+                if (car_input == null)
                 {
+                    return;
+                }
 
-                    runAstar();
+                float steering = car_input[0];
+                float acceleration = car_input[1];
 
+                if (current_target == null)
+                {
+                    replan();
+                }
 
-                    List<float> car_input = get_car_input();
-                    if (car_input == null)
-                    {
-                        return;
-                    }
-
-                    float steering = car_input[0];
-                    float acceleration = car_input[1];
-
-                    if (current_target == null)
-                    {
-                        replan();
-                    }
-
-                    if (go_back)
-                    {
-                        go_back_routine(-1.0f);
-                    }
-                    else if (go_forward)
-                    {
-                        go_back_routine(1.0f);
-                    }
-                    else
-                    {
-                        m_Car.Move(steering, acceleration, acceleration, 0f);
-                    }
+                if (go_back)
+                {
+                    go_back_routine(-1.0f);
+                }
+                else if (go_forward)
+                {
+                    go_back_routine(1.0f);
+                }
+                else
+                {
+                    m_Car.Move(steering, acceleration, acceleration, 0f);
                 }
             }
-
         }
 
 
@@ -133,7 +107,7 @@ namespace UnityStandardAssets.Vehicles.Car
         {
             if (currIndex == -1 || nodesToGoal.Count == 0)
                 return null;
-            
+
             Vector3 target_node = nodesToGoal[currIndex];
             Vector3 direction = (target_node - transform.position).normalized;
 
@@ -145,7 +119,6 @@ namespace UnityStandardAssets.Vehicles.Car
                 steering = 1.0f;
             } else {
                 steering /= 25.0f;
-                Debug.Log("new steering:" + steering);
             }
             
             float acceleration = 0;
@@ -189,7 +162,10 @@ namespace UnityStandardAssets.Vehicles.Car
             if (!can_update && can_run && enemies.Contains(current_target))
             {
                 nodesToGoal = astar.getPath(transform.position, true); //goal has already been loaded in updatePath
-                if (nodesToGoal.Count > 0)
+                Debug.Log("goal: " + astar.goal.pos + " start: " + astar.start.pos);
+                if (nodesToGoal == null) {
+                    Debug.Log("nodestogoal is null!");
+                } else
                 {
                     can_run = false;
                 }
@@ -220,9 +196,14 @@ namespace UnityStandardAssets.Vehicles.Car
         {
             load_lineOfSight();
             current_target = get_next_target();
+            Debug.Log("next target: " + current_target);
             if (current_target == null) {
+                Debug.Log("target is null!");
                 current_target = this.gameObject;
             }
+        
+            current_target = get_next_target();
+            Debug.Log("next target pos: " + current_target.transform.position);
 
             astar.initAstar(transform.position, current_target.transform.position);
             currIndex = 0;
@@ -281,8 +262,6 @@ namespace UnityStandardAssets.Vehicles.Car
                     if (enemies[i] == null) {
                         continue;
                     }
-                   // Gizmos.color = Color.blue;
-                   // Gizmos.DrawLine(transform.position, enemies[i].transform.position);
 
                     Gizmos.color = Color.red;
                     if (enemies[i + 1] == null){
@@ -409,113 +388,3 @@ namespace UnityStandardAssets.Vehicles.Car
         }
     }
 }
-
-/* Methods used when visualizing the pathfinding algorithm and car movement */
-
-/*
-    private void runAstar () {
-
-        if (astar.openSet.Count > 0 && can_run && !can_update && enemies.Contains (current_target)) {
-            Debug.Log ("calculating path in fixedupdate.., start: " + astar.start.wall + ", goal: " + astar.goal.wall + ", goalpos: " + astar.goal.pos + " target is null: " + (current_target == null));
-            var winner = 0;
-            for (int index = 0; index < astar.openSet.Count; index++) {
-                if (astar.openSet[index].f < astar.openSet[winner].f) {
-                    winner = index;
-                }
-            }
-
-            var current = astar.openSet[winner];
-
-            var goal = astar.goal;
-            int dist_to_goal = 3;
-            if (astar.grid.grid_distance[goal.i, goal.j] == -1) {
-                dist_to_goal = 5;
-            }
-            //find the path
-            if (Vector3.Distance (current.pos, astar.goal.pos) < dist_to_goal) {
-                nodesToGoal.Clear ();
-                var temp = current;
-                nodesToGoal.Add (temp.pos);
-
-                while (temp.previous != null) {
-                    nodesToGoal.Add (temp.previous.pos);
-                    temp = temp.previous;
-                }
-
-                int size_of_path = nodesToGoal.Count;
-                int modVal = 5;
-
-                if (size_of_path > 20) {
-                    modVal = 10;
-                } else if (size_of_path < 6) {
-                    modVal = 2;
-                }
-
-                for (int node_i = size_of_path - 1; node_i >= 0; node_i--) {
-                    if (node_i % modVal != 0) {
-                        Debug.Log ("removed");
-                        nodesToGoal.RemoveAt (node_i);
-                    }
-                }
-
-                nodesToGoal.Reverse ();
-
-                can_run = false;
-                DrawPath (nodesToGoal);
-
-                // findFurthestTarget ();
-                return;
-            }
-
-            astar.openSet.Remove (current);
-            astar.closedSet.Add (current);
-
-            var neighbors = current.neighbors;
-
-            for (int k = 0; k < neighbors.Count; k++) {
-                var neighbor = neighbors[k];
-                if (!astar.closedSet.Contains (neighbor) && !neighbor.wall) {
-                    var tempG = current.g + 1 * astar.getSplit ();
-
-                    if (astar.openSet.Contains (neighbor)) {
-                        if (tempG < neighbor.g) {
-                            neighbor.g = tempG;
-                        }
-                    } else {
-                        neighbor.g = tempG;
-                        astar.openSet.Add (neighbor);
-                    }
-
-                    neighbor.h = astar.heuristic (current.previous, current, neighbor, astar.goal);
-                    neighbor.f = neighbor.g + neighbor.h;
-                    neighbor.previous = current;
-                }
-            }
-            animateAstar ();
-        } else {
-            if (can_update) {
-                Debug.Log ("is updating");
-                updatePath ();
-            } else {
-                findFurthestTarget ();
-            }
-
-        }
-    }
-
-    private void animateAstar () {
-        foreach (Spot spot in astar.closedSet) {
-            spot.Draw (Color.red);
-        }
-
-        foreach (Spot spot in astar.openSet) {
-            spot.Draw (Color.green);
-        }
-    }
-
-    private void DrawPath (List<Vector3> path) {
-        for (int i = 0; i < path.Count - 1; i++) {
-            Debug.DrawLine (path[i], path[i + 1], Color.red, 100);
-        }
-    }
-    */

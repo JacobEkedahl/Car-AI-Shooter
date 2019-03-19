@@ -14,7 +14,7 @@ namespace UnityStandardAssets.Vehicles.Car
         EnemyPlanner enemy_planner;
 
         public GameObject cluster_manager_object;
-        TargetHandler_Prob2 target_handler;
+        TargetHandler_Prob1 target_handler;
 
         public GameObject[] friends;
         public List<GameObject> enemies;
@@ -28,7 +28,7 @@ namespace UnityStandardAssets.Vehicles.Car
         private void Start()
         {
             //Cluster manager, car ask for manager for which targets to find
-            target_handler = cluster_manager_object.GetComponent<TargetHandler_Prob2>();
+            target_handler = cluster_manager_object.GetComponent<TargetHandler_Prob1>();
             //Debug.Log("value from targethandler: " + target_handler.no_clusters + ", enemies: " + target_handler.no_enemies);
 
 

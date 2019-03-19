@@ -66,6 +66,8 @@ public class GameManager : MonoBehaviour {
     // Update is called once per frame
     void Update () {
 
+        //tmp comment out for data testing
+        /*
         turret_list.RemoveAll(item => item == null);
         turret_text.text = "Remaining turrets:" + turret_list.Count;    
 
@@ -77,6 +79,6 @@ public class GameManager : MonoBehaviour {
             }
             turret_text.text += " Mission Accomplished in " + completion_time.ToString("n2") + "seconds!";
 
-        }
+        }*/
     }
 }
