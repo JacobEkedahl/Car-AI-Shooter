@@ -20,6 +20,7 @@ public class TargetHandler : MonoBehaviour
     {
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
         enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
+        Debug.Log("enemies size: " + enemies.Count);
         no_clusters = GameObject.FindGameObjectsWithTag("Player").Length;
         no_enemies = enemies.Count;
     }
@@ -30,6 +31,7 @@ public class TargetHandler : MonoBehaviour
     }
 
     private void generateCluster() {
+        Debug.Log("enemies in generate: " + enemies.Count);
         Cluster cluster = new Cluster(no_clusters, terrain_manager, enemies);
         cluster.run();
         this.clusters = cluster.clusters;

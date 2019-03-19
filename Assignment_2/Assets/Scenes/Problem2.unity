@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -5809,6 +5809,52 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!1 &130498457
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 130498458}
+  - component: {fileID: 130498459}
+  m_Layer: 0
+  m_Name: ClusterManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &130498458
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 130498457}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 272.4327, y: 36.92436, z: 209.71602}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &130498459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 130498457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9934e7b85af2a024c93f3ab196f313f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  terrain_manager_game_object: {fileID: 342108197}
+  enemies: []
+  current_car: 0
 --- !u!1 &138796518
 GameObject:
   m_ObjectHideFlags: 0
@@ -10621,7 +10667,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &172169027
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10651,8 +10697,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 342108197}
+  cluster_manager_object: {fileID: 130498457}
   friends: []
   enemies: []
+  lineOfSight_enemies: []
 --- !u!114 &172169029
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11555,7 +11603,7 @@ GameObject:
   - component: {fileID: 342108199}
   - component: {fileID: 342108198}
   m_Layer: 0
-  m_Name: TerrainManager (1)
+  m_Name: TerrainManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34044,7 +34092,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1193214290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34070,12 +34118,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1193214289}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd8f88dbef86049759c7f8b36661fe22, type: 3}
+  m_Script: {fileID: 11500000, guid: ac0615546388c46a68ca4014cce1578b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 342108197}
+  cluster_manager_object: {fileID: 130498457}
   friends: []
   enemies: []
+  lineOfSight_enemies: []
 --- !u!114 &1193214292
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55421,7 +55471,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1981892164}
   - component: {fileID: 1981892163}
-  - component: {fileID: 1981892162}
   m_Layer: 0
   m_Name: GameManager (1)
   m_TagString: Untagged
@@ -55429,18 +55478,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1981892162
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1981892161}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 658b0de4ee3ec4f2fbc93d4ccc293929, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1981892163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55460,7 +55497,6 @@ MonoBehaviour:
   number_of_extra_cars: 0
   random_seed: 7
   turret_text: {fileID: 1500313255}
-  turret_list: []
   weak_turrets: 1
   long_range_turrets: 0
 --- !u!4 &1981892164
@@ -76783,14 +76819,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3165470286205641539}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cd8f88dbef86049759c7f8b36661fe22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 342108197}
+  cluster_manager_object: {fileID: 130498457}
   friends: []
   enemies: []
+  lineOfSight_enemies: []
 --- !u!114 &3165470286205641659
 MonoBehaviour:
   m_ObjectHideFlags: 0

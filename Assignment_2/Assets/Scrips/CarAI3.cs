@@ -114,8 +114,7 @@ namespace UnityStandardAssets.Vehicles.Car
             } else {
                 steering /= 25.0f;
             }
-
-            Debug.Log("steering: " + steering);
+            
             float acceleration = 0;
 
             if (is_to_the_right && is_to_the_front)

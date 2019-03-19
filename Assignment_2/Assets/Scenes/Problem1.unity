@@ -29885,6 +29885,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1036884991}
   - component: {fileID: 1036884990}
+  - component: {fileID: 1036884992}
   m_Layer: 0
   m_Name: ClusterManager
   m_TagString: Untagged
@@ -29904,9 +29905,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 275eb5b29f79da54f9f76297b7380c3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrain_manager_game_object: {fileID: 1358011048}
-  enemies: []
-  current_car: 0
 --- !u!4 &1036884991
 Transform:
   m_ObjectHideFlags: 0
@@ -29921,6 +29919,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1036884992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1036884989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6e187541ee05a941bf20b43c1758656, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  terrain_manager_game_object: {fileID: 1358011048}
+  enemies: []
+  current_car: 0
 --- !u!1 &1039683544
 GameObject:
   m_ObjectHideFlags: 0
