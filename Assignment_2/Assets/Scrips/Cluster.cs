@@ -20,7 +20,7 @@ public class Cluster {
         this.clusters = new List<List<GameObject>>();
         this.cluster_means = new List<Vector3>();
         this.enemies = enemies;
-        GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
+        GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 0);
        // aStar = new AStar(grid); //astar loads this grid into a internal voronoigrid
 
         for(int i = 0; i < k; i++){

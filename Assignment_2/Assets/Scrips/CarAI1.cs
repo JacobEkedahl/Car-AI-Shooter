@@ -43,7 +43,7 @@ namespace UnityStandardAssets.Vehicles.Car
             friends = GameObject.FindGameObjectsWithTag("Player");
 
             //retrieve the list of nodes from my position to next pos
-            GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
+            GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 0);
             astar = new AStar(grid, false); //astar loads this grid into a internal voronoigrid, the targets are not turrets
         }
 

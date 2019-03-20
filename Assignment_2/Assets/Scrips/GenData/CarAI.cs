@@ -40,7 +40,7 @@ namespace UnityStandardAssets.Vehicles.Car
             enemy_planner = new EnemyPlanner();
 
             //retrieve the list of nodes from my position to next pos
-            GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
+            GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 0);
             astar = new AStar(grid, false); //astar loads this grid into a internal voronoigrid, the targets are not turrets
         }
         
@@ -58,9 +58,9 @@ namespace UnityStandardAssets.Vehicles.Car
             enemies.Clear();
             gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
             gameObject.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-            transform.position = new Vector3(220.0f, 0.5f, 230.0f);
+            transform.position = generator.getStartPos();
             transform.eulerAngles = new Vector3(10, generator.getRotation(), 0);
-            current_target = null;
+            current_target = null; //need to set to null to generate new path to next node
         }
 
         List<Spot> path = new List<Spot>();
@@ -68,10 +68,8 @@ namespace UnityStandardAssets.Vehicles.Car
         {
             if (generator.canFetch() && !generator.hasFetched)
             {
-                Debug.Log("fetching enemies!");
                 enemies = generator.getTargets();
             } else if (generator.hasFetched) {
-                Debug.Log("has fetched!");
                 runAstar();
                 List<float> car_input = get_car_input();
                 if (car_input == null)
@@ -164,7 +162,6 @@ namespace UnityStandardAssets.Vehicles.Car
                 nodesToGoal = astar.getPath(transform.position, true); //goal has already been loaded in updatePath
                 Debug.Log("goal: " + astar.goal.pos + " start: " + astar.start.pos);
                 if (nodesToGoal == null) {
-                    Debug.Log("nodestogoal is null!");
                 } else
                 {
                     can_run = false;
@@ -196,19 +193,16 @@ namespace UnityStandardAssets.Vehicles.Car
         {
             load_lineOfSight();
             current_target = get_next_target();
-            Debug.Log("next target: " + current_target);
             if (current_target == null) {
-                Debug.Log("target is null!");
                 current_target = this.gameObject;
             }
         
             current_target = get_next_target();
-            Debug.Log("next target pos: " + current_target.transform.position);
 
             astar.initAstar(transform.position, current_target.transform.position);
             currIndex = 0;
 
-            Debug.DrawLine(current_target.transform.position, transform.position, Color.blue, 100);
+         //   Debug.DrawLine(current_target.transform.position, transform.position, Color.blue, 100);
             can_update = false;
         }
 

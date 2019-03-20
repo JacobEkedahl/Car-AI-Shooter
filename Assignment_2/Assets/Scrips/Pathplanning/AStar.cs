@@ -14,18 +14,19 @@ public class AStar {
     public Vector3 start_pos;
 
     public AStar (GridDiscretization grid, Boolean turretTarget) {
+        //Debug.Log("grid: " + grid.toString());
         this.turretTarget = turretTarget;
         openSet = new List<Spot> ();
         closedSet = new List<Spot> ();
 
         this.grid = new VoronoiGraph (grid);
         //this.grid.draw();
-        this.grid_spots = new Spot[this.grid.x_N, this.grid.z_N];
+        this.grid_spots = new SpotRealTime[this.grid.x_N, this.grid.z_N];
 
         for (int i = 0; i < this.grid.x_N; i++) {
             for (int j = 0; j < this.grid.z_N; j++) {
                 bool wall = this.grid.grid_distance[i, j] == -1;
-                grid_spots[i, j] = new Spot (grid.get_x_pos (i), grid.get_z_pos (j), i, j, wall, this.grid.grid_distance[i, j]);
+                grid_spots[i, j] = new SpotRealTime(grid.get_x_pos (i), grid.get_z_pos (j), i, j, wall, this.grid.grid_distance[i, j]);
             }
         }
 
@@ -105,6 +106,7 @@ public class AStar {
         for (int i = 0; i < path_to_goal.Count-1; i++)
         {
             result += Vector3.Distance(path_to_goal[i], path_to_goal[i + 1]);
+            Debug.DrawLine(path_to_goal[i], path_to_goal[i + 1], Color.white, 50);
         }
 
         return result;
@@ -202,7 +204,7 @@ public class AStar {
                 }
             }
         }
-        
+
         return null;
     }
 

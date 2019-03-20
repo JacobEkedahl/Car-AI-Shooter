@@ -7,18 +7,21 @@ public class TargetHandler_GenData
     public List<GameObject> enemies;
 
     public float angle { get; set; } = 0.0f;
-    HashSet<int> taken = new HashSet<int>();
     public int myStart { get; set; } = 0;
     public int targetIndex { get; set; } = 0;
     private int angleInc = 90;
+    private List<int> targetIndexes = new List<int>();
 
-    public TargetHandler_GenData(TerrainInfo info) { 
+    public TargetHandler_GenData(TerrainInfo info) {
         addEnemies(info); //adding cubes to map
+        generateTargets();
     }
     
     //should be called after every new starting position
     private void generateTargets()
     {
+        targetIndexes.Clear();
+        HashSet<int> taken = new HashSet<int>();
         angle = 0;
         targetIndex = 0;
         taken.Clear();
@@ -29,11 +32,15 @@ public class TargetHandler_GenData
                 taken.Add(randomIndex);
             }
         }
+
+        foreach(int index in taken) {
+            targetIndexes.Add(index);
+        }
     }
 
     //angle cant be increased anymore, resetting and caller should increment startpos
     public bool incrementAngle() {
-        if (angle + angleInc > 360.0) {
+        if (angle + angleInc >= 360.0) {
             angle = 0;
             return false;
         }
@@ -56,7 +63,7 @@ public class TargetHandler_GenData
 
     //if it returns false increment startPos should be called
     public bool incrementTarget() {
-        if (targetIndex + 1 == taken.Count) {
+        if (targetIndex + 1 == targetIndexes.Count) {
             return false;
         }
 
@@ -70,9 +77,9 @@ public class TargetHandler_GenData
     }
 
     public GameObject getTarget()
-    {
-        Debug.Log("found obj: " + enemies[targetIndex] + " targetIndex: " + targetIndex);
-        return enemies[targetIndex];
+    {   
+      //  Debug.Log("found obj: " + enemies[targetIndexes[targetIndex]] + " targetIndex: " + targetIndexes[targetIndex]);
+        return enemies[targetIndexes[targetIndex]];
     }
     
     public void addEnemies(TerrainInfo info)

@@ -15,12 +15,17 @@ public class CarManager: MonoBehaviour
     private float start_time;
     private float completion_time;
 
+    private RealAstar astar;
+
     // Use this for initialization
     void Start()
     {
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
         targetHandler = new TargetHandler_GenData(terrain_manager.myInfo);
         
+        GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 5,5, 1);
+        astar = new RealAstar(grid);
+
         car.transform.position = new Vector3(220.0f, 0.5f, 230.0f);
         car.transform.rotation = Quaternion.identity;
         setTime();
@@ -31,12 +36,28 @@ public class CarManager: MonoBehaviour
         completion_time = start_time - 1f;
     }
 
+    private void calculateDist() {
+        Vector3 start = getStartPos();
+        Vector3 goal = targetHandler.getTarget().transform.position;
+
+        astar.initAstar(start, goal);
+        float distance = astar.dist_astar();
+        Debug.Log("distance non voronoi: " + distance);
+    }
+
     public float getRotation() {
-        return targetHandler.angle;
+        float angle = targetHandler.angle;
+        Debug.Log("fetching angle: " + angle);
+        return angle;
+    }
+    
+    public Vector3 getStartPos() {
+        Vector3 newPos = targetHandler.getStartPos().transform.position;
+        newPos.y = 0.5f;
+        return newPos;
     }
 
     public bool canFetch () {
-        Debug.Log("can fetch!");
         return targetHandler != null;
     }
 
@@ -69,6 +90,7 @@ public class CarManager: MonoBehaviour
             }
             reachedTarget = false;
             hasFetched = false;
+            calculateDist();
             setTime();
         }
     }
