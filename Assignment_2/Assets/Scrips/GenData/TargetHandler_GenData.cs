@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class TargetHandler_GenData
@@ -70,12 +71,11 @@ public class TargetHandler_GenData
         targetIndex++;
         return true;
     }
-    
 
     public GameObject getStartPos() {
         return enemies[myStart];
     }
-
+    
     public GameObject getTarget()
     {   
       //  Debug.Log("found obj: " + enemies[targetIndexes[targetIndex]] + " targetIndex: " + targetIndexes[targetIndex]);

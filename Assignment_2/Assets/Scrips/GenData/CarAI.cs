@@ -40,7 +40,7 @@ namespace UnityStandardAssets.Vehicles.Car
             enemy_planner = new EnemyPlanner();
 
             //retrieve the list of nodes from my position to next pos
-            GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 0);
+            GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
             astar = new AStar(grid, false); //astar loads this grid into a internal voronoigrid, the targets are not turrets
         }
         

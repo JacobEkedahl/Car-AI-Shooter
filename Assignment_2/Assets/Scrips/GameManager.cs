@@ -31,8 +31,10 @@ public class GameManager : MonoBehaviour {
     // Use this for initialization
     void Start () {
 
+        //tmp for testin
+
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
-       
+        
         start_time = Time.time;
         completion_time = start_time - 1f;
 
@@ -40,6 +42,8 @@ public class GameManager : MonoBehaviour {
         race_car.transform.rotation = Quaternion.identity;
 
         Random.InitState(random_seed);
+
+        /*
         for(int i = 0; i < number_of_turrets; i++)
         {
             Vector3 pos = terrain_manager.myInfo.GetRandomFreePos();
@@ -58,15 +62,14 @@ public class GameManager : MonoBehaviour {
             Vector3 pos = new Vector3(185f, 0, 135 + 10 * i);
             pos.y = 2f;
             turret_list.Add(Instantiate(race_car, pos, Quaternion.identity));
-        }
+        }*/
 
-
+        
     }
 
     // Update is called once per frame
     void Update () {
-
-        //tmp comment out for data testing
+    
         /*
         turret_list.RemoveAll(item => item == null);
         turret_text.text = "Remaining turrets:" + turret_list.Count;    

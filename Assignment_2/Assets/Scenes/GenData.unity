@@ -1661,7 +1661,6 @@ MonoBehaviour:
   terrain_manager_game_object: {fileID: 1358011048}
   enemies: []
   lineOfSight_enemies: []
-  completion_time: 0
 --- !u!4 &1069448166
 Transform:
   m_ObjectHideFlags: 0
