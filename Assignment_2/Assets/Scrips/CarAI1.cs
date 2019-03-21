@@ -43,7 +43,7 @@ namespace UnityStandardAssets.Vehicles.Car
             friends = GameObject.FindGameObjectsWithTag("Player");
 
             //retrieve the list of nodes from my position to next pos
-            GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
+            GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
             astar = new AStar(grid, false); //astar loads this grid into a internal voronoigrid, the targets are not turrets
         }
 
@@ -77,8 +77,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 enemies = new List<GameObject>(vrp.tour);
             }
         }
-
-        List<Spot> path = new List<Spot>();
+        
         private void FixedUpdate()
         {
             //Time.timeScale = 10.0f;
@@ -188,7 +187,7 @@ namespace UnityStandardAssets.Vehicles.Car
             remove_close_box();
             if (!can_update && can_run && enemies.Contains(current_target))
             {
-                nodesToGoal = astar.getPath(transform.position, true); //goal has already been loaded in updatePath
+                nodesToGoal = astar.getPath(); //goal has already been loaded in updatePath
                 if (nodesToGoal.Count > 0)
                 {
                     can_run = false;
@@ -219,25 +218,10 @@ namespace UnityStandardAssets.Vehicles.Car
         private void updatePath()
         {
             load_lineOfSight();
-
-            //if (lineOfSight_enemies.Count > 0)
-            //{
-                //current_target = enemy_planner.get_closest_object(lineOfSight_enemies, transform.position);
-            //}
-            //else
-            //{
-                //current_target = enemy_planner.get_closest_object(enemies, transform.position);
-                //vrp.construct_NN_tour(this.gameObject);
-                //vrp.two_opt();
-                //enemies = new List<GameObject>(vrp.tour);
-                current_target = get_next_target();
-                if (current_target == null) {
-                    current_target = this.gameObject;
-                }
-            //}
-
-
             current_target = get_next_target();
+            if (current_target == null) {
+                current_target = this.gameObject;
+            }
 
             astar.initAstar(transform.position, current_target.transform.position);
             currIndex = 0;

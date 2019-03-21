@@ -60,17 +60,6 @@ public class TargetHandler_Prob1 : MonoBehaviour
             }
             res.Add(row);
         }
-
-       
-        //Debug.Log("enemies size: " + enemies.Count);
-
-        /* 
-        foreach(string s in res)
-        {
-            Debug.Log(s);
-        }
-        Debug.Log("Width: " + width + ", height: " + height);
-        */
     }
 
     //cars call this method to get one of the generated clusters

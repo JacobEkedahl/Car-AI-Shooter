@@ -43,7 +43,7 @@ namespace UnityStandardAssets.Vehicles.Car
             //enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
 
             //retrieve the list of nodes from my position to next pos
-            GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo);
+            GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
             astar = new AStar(grid, true); //astar loads this grid into a internal voronoigrid
         }
 
@@ -62,8 +62,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 has_fetched = true;
             }
         }
-
-        List<Spot> path = new List<Spot>();
+        
         private void FixedUpdate()
         {
             if (loadTime > 0)
@@ -154,7 +153,7 @@ namespace UnityStandardAssets.Vehicles.Car
         {
             if (!can_update && can_run && enemies.Contains(current_target))
             {
-                nodesToGoal = astar.getPath(transform.position, true); //goal has already been loaded in updatePath
+                nodesToGoal = astar.getPath(); //goal has already been loaded in updatePath
                 if (nodesToGoal.Count > 0)
                 {
                     can_run = false;

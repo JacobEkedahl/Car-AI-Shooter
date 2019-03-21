@@ -5,103 +5,112 @@ using UnityEngine;
 namespace UnityStandardAssets.Vehicles.Car
 {
     [RequireComponent(typeof(CarController))]
-    public class CarAI2 : MonoBehaviour
+    public class CarAI : MonoBehaviour
     {
         private CarController m_Car; // the car controller we want to use
+        public GameObject target_handler;
 
         public GameObject terrain_manager_game_object;
         TerrainManager terrain_manager;
         EnemyPlanner enemy_planner;
+        CarManager generator;
 
-        public GameObject cluster_manager_object;
-        TargetHandler_Prob1 target_handler;
-
-        public GameObject[] friends;
         public List<GameObject> enemies;
         public List<GameObject> lineOfSight_enemies = new List<GameObject>();
 
-        private List<Vector3> nodesToGoal = new List<Vector3>();
-        private int currIndex = 0; //which node to target
+        private List<Vector3> nodesToGoal;
+        private int currIndex = -1; //which node to target
         private AStar astar;
-        private int loadTime = 100;
+
+        public bool hasEnemies { get; set; } = false;
+        public void setEnemies(List<GameObject> objects) {
+            enemies = objects;
+            hasEnemies = true;
+        }
 
         private void Start()
         {
             //Cluster manager, car ask for manager for which targets to find
-            target_handler = cluster_manager_object.GetComponent<TargetHandler_Prob1>();
-            //Debug.Log("value from targethandler: " + target_handler.no_clusters + ", enemies: " + target_handler.no_enemies);
-
+            generator = target_handler.GetComponent<CarManager>();
+            nodesToGoal = new List<Vector3>();
 
             // get the car controller
             m_Car = GetComponent<CarController>();
             terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
             enemy_planner = new EnemyPlanner();
 
-            // note that both arrays will have holes when objects are destroyed
-            // but for initial planning they should work
-            friends = GameObject.FindGameObjectsWithTag("Player");
-            //enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
-
             //retrieve the list of nodes from my position to next pos
             GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
-            astar = new AStar(grid, true); //astar loads this grid into a internal voronoigrid
-        }
-
-        private bool has_fetched = false;
-        private void fetch_clusters()
-        {
-            while (!target_handler.has_clustered)
-            {
-                //wait
-            }
-
-            //fetch clusters if not has fetched
-            if (!has_fetched)
-            {
-                enemies = target_handler.getCluster();
-                has_fetched = true;
-            }
+            astar = new AStar(grid, false); //astar loads this grid into a internal voronoigrid, the targets are not turrets
         }
         
+        private void remove_close_box()
+        {
+            if (Vector3.Distance(transform.position, enemies[0].transform.position) <= 3.0f)
+            {
+              //  Debug.Log("reached target");
+                if (generator.saveTime(Time.time)) {
+                    respawn();
+                }
+            }
+        }
+
+        //if car gets stuck or dont move to target within a time, it gets reseted
+        public void reset() {
+            gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
+            gameObject.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+            transform.position = generator.getStartPos();
+            transform.eulerAngles = new Vector3(10, generator.getRotation(), 0);
+        }
+
+        private void respawn() {
+            enemies.Clear();
+            reset();
+            current_target = null; //need to set to null to generate new path to next node
+        }
+
         private void FixedUpdate()
         {
-            if (loadTime > 0)
-            { //waiting for car to settle after landing from sky
-                loadTime--;
-                go_back_routine(1.0f);
-            }
-            else
+            if (generator.canFetch() && !generator.hasFetched)
             {
-                fetch_clusters();
+                enemies = generator.getTargets();
+            } else if (generator.hasFetched) {
                 runAstar();
-            }
+                List<float> car_input = get_car_input();
+                if (car_input == null)
+                {
+                    return;
+                }
 
-            List<float> car_input = get_car_input();
-            float steering = car_input[0];
-            float acceleration = car_input[1];
+                float steering = car_input[0];
+                float acceleration = car_input[1];
 
-            if (current_target == null)
-            {
-                replan();
-            }
+                if (current_target == null)
+                {
+                    replan();
+                }
 
-            if (go_back)
-            {
-                go_back_routine(-1.0f);
-            }
-            else if (go_forward)
-            {
-                go_back_routine(1.0f);
-            }
-            else
-            {
-                m_Car.Move(steering, acceleration, acceleration, 0f);
+                if (go_back)
+                {
+                    go_back_routine(-1.0f);
+                }
+                else if (go_forward)
+                {
+                    go_back_routine(1.0f);
+                }
+                else
+                {
+                    m_Car.Move(steering, acceleration, acceleration, 0f);
+                }
             }
         }
 
 
         private List<float> get_car_input()
         {
+            if (currIndex == -1 || nodesToGoal.Count == 0)
+                return null;
+
             Vector3 target_node = nodesToGoal[currIndex];
             Vector3 direction = (target_node - transform.position).normalized;
 
@@ -109,15 +118,12 @@ namespace UnityStandardAssets.Vehicles.Car
             bool is_to_the_front = Vector3.Dot(direction, transform.forward) > 0f;
 
             float steering = (Vector3.Angle(direction, transform.forward));
-            if (steering >= 25f)
-            {
+            if (steering >= 25f) {
                 steering = 1.0f;
-            }
-            else
-            {
+            } else {
                 steering /= 25.0f;
             }
-
+            
             float acceleration = 0;
 
             if (is_to_the_right && is_to_the_front)
@@ -141,26 +147,13 @@ namespace UnityStandardAssets.Vehicles.Car
                 acceleration = -1f;
             }
 
-            if (m_Car.CurrentSpeed > 20) acceleration = 0;
+            if (m_Car.CurrentSpeed > 17) acceleration = 0;
 
             List<float> car_input = new List<float>();
             car_input.Add(steering);
             car_input.Add(acceleration);
 
             return car_input;
-        }
-
-        private void remove_close_box()
-        {
-            foreach (GameObject box in enemies)
-            {
-                if (box == null)
-                    continue;
-                if (Vector3.Distance(transform.position, box.transform.position) <= 3.0f)
-                {
-                    Destroy(box);
-                }
-            }
         }
 
         //Methods used for pathplanning ---------------------------------------------------------
@@ -172,7 +165,9 @@ namespace UnityStandardAssets.Vehicles.Car
             if (!can_update && can_run && enemies.Contains(current_target))
             {
                 nodesToGoal = astar.getPath(); //goal has already been loaded in updatePath
-                if (nodesToGoal.Count > 0)
+                generator.setTime(); //reset the timer
+                if (nodesToGoal == null) {
+                } else
                 {
                     can_run = false;
                 }
@@ -189,23 +184,30 @@ namespace UnityStandardAssets.Vehicles.Car
 
         private bool can_update = true;
         private GameObject current_target;
+
+        private GameObject get_next_target() {
+            for (int i = 0; i < enemies.Count; i++) {
+                if (!(enemies[i] == null)){
+                    return enemies[i];
+                }
+            }
+            return null;
+        }
+
         private void updatePath()
         {
             load_lineOfSight();
-
-            if (lineOfSight_enemies.Count > 0)
-            {
-                current_target = enemy_planner.get_closest_object(lineOfSight_enemies, transform.position);
+            current_target = get_next_target();
+            if (current_target == null) {
+                current_target = this.gameObject;
             }
-            else
-            {
-                current_target = enemy_planner.get_closest_object(enemies, transform.position);
-            }
+        
+            current_target = get_next_target();
 
             astar.initAstar(transform.position, current_target.transform.position);
             currIndex = 0;
 
-            Debug.DrawLine(current_target.transform.position, transform.position, Color.blue, 100);
+         //   Debug.DrawLine(current_target.transform.position, transform.position, Color.blue, 100);
             can_update = false;
         }
 
@@ -242,13 +244,35 @@ namespace UnityStandardAssets.Vehicles.Car
                 go_forward = false;
             }
         }
-
-
+        
         private int timer = 100;
         private void OnDrawGizmos()
         {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(transform.position, nodesToGoal[currIndex]);
+            if(Application.isPlaying)
+            {
+                if (nodesToGoal.Count > 0)
+                {
+                    Gizmos.color = Color.yellow;
+                    Gizmos.DrawLine(transform.position, nodesToGoal[currIndex]);
+                }
+
+                Gizmos.color = Color.red;
+                for (int i = 0; i < enemies.Count - 1; i++ ){
+                    if (enemies[i] == null) {
+                        continue;
+                    }
+
+                    Gizmos.color = Color.red;
+                    if (enemies[i + 1] == null){
+                        continue;
+                    }
+                    Vector3 from = enemies[i].transform.position;
+                    from.y += 1;
+                    Vector3 to = enemies[i + 1].transform.position;
+                    to.y += 1;
+                    Gizmos.DrawLine(from, to);
+                }
+            }
         }
 
         private void OnCollisionExit(Collision other)
@@ -261,22 +285,18 @@ namespace UnityStandardAssets.Vehicles.Car
         private void OnCollisionStay(Collision other)
         {
             if (coll_timer == 100)
-            {
+            {   
                 if (other.gameObject.tag == "Player")
                 {
-                    Debug.Log("Collision with another player!");
                     int choice = Random.Range(0, 2);
                     if (choice == 0)
                     {
                         go_back = true;
-                    }
-                    else
+                    } else
                     {
                         go_forward = true;
-                        Debug.Log("not zero!");
                     }
-                }
-                else if (is_coll_back())
+                } else if (is_coll_back())
                 {
                     go_back = true;
                 }
@@ -290,7 +310,6 @@ namespace UnityStandardAssets.Vehicles.Car
         //Methods used for following path and demanding new path to be generated --------------
         private void replan()
         {
-            Debug.Log("reset!");
             enemies = enemy_planner.remove_destroyed(enemies);
             currIndex = 0;
             can_run = true;
@@ -321,7 +340,7 @@ namespace UnityStandardAssets.Vehicles.Car
 
             offset *= 2;
             Vector3 right_pos_forward = transform.position + offset_forward + offset;
-            Vector3 left_pos_forward = transform.position + offset_forward + -offset;
+            Vector3 left_pos_forward = transform.position + offset_forward + - offset;
             Vector3 right_pos_backward = transform.position + offset_backward + offset;
             Vector3 left_pos_backward = transform.position + offset_backward + -offset;
 

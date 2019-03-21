@@ -8,7 +8,7 @@ namespace UnityStandardAssets.Vehicles.Car
     {
         [SerializeField] private float m_PersistTime;
 
-
+        /*
         private IEnumerator Start()
         {
 			while (true)
@@ -20,6 +20,6 @@ namespace UnityStandardAssets.Vehicles.Car
 					Destroy(gameObject, m_PersistTime);
                 }
             }
-        }
+        }*/
     }
 }

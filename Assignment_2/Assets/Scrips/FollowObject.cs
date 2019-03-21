@@ -19,7 +19,9 @@ public class FollowObject : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = target_object.position - behind * target_object.forward + above * target_object.up;
-        transform.rotation = target_object.rotation;
+        if (target_object != null) {
+            transform.position = target_object.position - behind * target_object.forward + above * target_object.up;
+            transform.rotation = target_object.rotation;
+        }
     }
 }
