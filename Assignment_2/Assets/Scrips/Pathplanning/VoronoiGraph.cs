@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+[Serializable]
 public class VoronoiGraph {
     public float[, ] grid_distance { get; private set; }
 

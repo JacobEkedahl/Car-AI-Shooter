@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class SpotRealTime {
     public Vector3 pos { get; set; }
     public float f { get; set; }
