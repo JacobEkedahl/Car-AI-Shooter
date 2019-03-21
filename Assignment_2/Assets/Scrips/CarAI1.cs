@@ -77,8 +77,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 enemies = new List<GameObject>(vrp.tour);
             }
         }
-
-        List<Spot> path = new List<Spot>();
+        
         private void FixedUpdate()
         {
             //Time.timeScale = 10.0f;
@@ -188,7 +187,7 @@ namespace UnityStandardAssets.Vehicles.Car
             remove_close_box();
             if (!can_update && can_run && enemies.Contains(current_target))
             {
-                nodesToGoal = astar.getPath(transform.position, true); //goal has already been loaded in updatePath
+                nodesToGoal = astar.getPath(); //goal has already been loaded in updatePath
                 if (nodesToGoal.Count > 0)
                 {
                     can_run = false;

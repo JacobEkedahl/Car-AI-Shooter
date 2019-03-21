@@ -1,14 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class AStar {
     //public GridDiscretization grid {get; set;}
     public VoronoiGraph grid { get; set; }
-    public Spot[, ] grid_spots { get; set; }
-    public List<Spot> openSet { get; set; }
-    public List<Spot> closedSet { get; set; }
+    public SpotRealTime[, ] grid_spots { get; set; }
+    public List<SpotRealTime> openSet { get; set; }
+    public List<SpotRealTime> closedSet { get; set; }
 
     private Boolean turretTarget;
     public Vector3 start_pos;
@@ -16,8 +17,8 @@ public class AStar {
     public AStar (GridDiscretization grid, Boolean turretTarget) {
         //Debug.Log("grid: " + grid.toString());
         this.turretTarget = turretTarget;
-        openSet = new List<Spot> ();
-        closedSet = new List<Spot> ();
+        openSet = new List<SpotRealTime> ();
+        closedSet = new List<SpotRealTime> ();
 
         this.grid = new VoronoiGraph (grid);
         //this.grid.draw();
@@ -59,13 +60,13 @@ public class AStar {
         return result;
     }
 
-    public Spot start { get; set; }
-    public Spot goal { get; set; }
+    public SpotRealTime start { get; set; }
+    public SpotRealTime goal { get; set; }
     public void initAstar (Vector3 start_pos, Vector3 goal_pos) {
         this.start_pos = start_pos;
         clear_grid ();
-        openSet = new List<Spot> ();
-        closedSet = new List<Spot> ();
+        openSet = new List<SpotRealTime> ();
+        closedSet = new List<SpotRealTime> ();
 
         int start_i = grid.get_i_index (start_pos.x);
         int start_j = grid.get_j_index (start_pos.z);
@@ -98,21 +99,123 @@ public class AStar {
         }
     }
 
-    public float dist_astar()
+    public float dist_astar(List<Vector3> path)
     {
         float result = 0.0f;
-        List<Vector3> path_to_goal = getPath(start_pos, false);
 
-        for (int i = 0; i < path_to_goal.Count-1; i++)
+        for (int i = 0; i < path.Count - 1; i++)
         {
-            result += Vector3.Distance(path_to_goal[i], path_to_goal[i + 1]);
-            Debug.DrawLine(path_to_goal[i], path_to_goal[i + 1], Color.white, 50);
+            result += Vector3.Distance(path[i], path[i + 1]);
+            Debug.DrawLine(path[i], path[i + 1], Color.white, 50);
         }
 
         return result;
     }
 
-    public List<Vector3> getPath (Vector3 start_pos, bool useVoronoi) {
+    public List<Vector3> reconstructPath(List<Vector3> path)
+    {
+        List<Vector3> result = new List<Vector3>();
+        Vector3 start = path[0];
+        Vector3 furthest = findFurthest(start, start, path);
+        //Debug.Log("is furthest start: " + (start == furthest));
+        result = navigateToTarget(start, furthest, path);
+        return result;
+    }
+
+    private Vector3 findFurthest(Vector3 from, Vector3 currentFurthest, List<Vector3> path) {
+        int indexFurthest = path.IndexOf(currentFurthest);
+        
+        for (int i = path.Count-1; i >= indexFurthest; i--)
+        {
+            if (canSee(from, path[i]))
+            {
+                return path[i];
+            }
+        }
+
+        return currentFurthest;
+    }
+    
+    private List<Vector3> navigateToTarget(Vector3 from, Vector3 to, List<Vector3> path) {
+        //lerp from, to. If one see a target further then add the current vector to result and repeat.
+        List<Vector3> result = new List<Vector3>();
+        float distance = Vector3.Distance(from, to);
+        result.Add(from);
+        
+        float fracJourney = 0.0f;
+
+        while (fracJourney <= 1) {
+            Vector3 newPos = Vector3.Lerp(from, to, fracJourney);
+            Vector3 furthest = findFurthest(newPos, to, path);
+
+            if (furthest != to) {
+                from = newPos;
+                to = furthest; 
+                distance = Vector3.Distance(from, to);
+                result.Add(from);
+                Debug.DrawLine(from, to, Color.blue, 50);
+                fracJourney = 0.0f;
+            }
+            fracJourney += 1/(distance);
+        }
+
+        result.Add(path[path.Count - 1]);
+        return result;
+    }
+
+    private bool canSee(Vector3 from, Vector3 to) {
+        Debug.DrawLine(from, to, Color.blue);
+        float dist = Vector3.Distance(from, to);
+        float currPos = 0;
+        float fracJourney = 0;
+
+        while (fracJourney < 1) {
+            // Set our position as a fraction of the distance between the markers.
+            Vector3 newPos = Vector3.Lerp(from, to, fracJourney);
+            if (!isInGrid(newPos)) {
+                return false;
+            }
+            currPos += 10;
+            fracJourney = currPos / dist;
+        }
+
+        return true;
+    }
+
+    private bool isInGrid(Vector3 pos) {
+        float x = pos.x;
+        float z = pos.z;
+        int i = grid.get_i_index(x);
+        int j = grid.get_i_index(z);
+        //  Debug.Log("x, z:" + x + ":" + z);
+
+        //wall
+        if (grid.grid_distance[i, j] == -1)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public float getAngle(List<Vector3> path, Vector3 dir)
+    {
+        int index = 0;
+        for (int i = 0; i < path.Count; i++)
+        {
+            if (Vector3.Distance(path[i], start.pos) > 0)
+            {
+                index = i;
+                break;
+            }
+        }
+
+        Vector3 targetDir = path[index] - start.pos;
+        Debug.DrawLine(start.pos, path[index], Color.red, 80);
+        return Vector3.SignedAngle(targetDir, dir, Vector3.down);
+    }
+
+    public List<Vector3> getPath () {
         List<Vector3> path = new List<Vector3> ();
         
         while (openSet.Count > 0) {
@@ -191,14 +294,9 @@ public class AStar {
                         neighbor.g = tempG;
                         openSet.Add (neighbor);
                     }
-
-                    if (useVoronoi)
-                    {
-                        neighbor.h = heuristic(current.previous, current, neighbor, goal);
-                    } else
-                    {
-                        neighbor.h = heuristic_nonWall(neighbor, goal);
-                    }
+                    
+                    neighbor.h = heuristic(current.previous, current, neighbor, goal);
+                    
                     neighbor.f = neighbor.g + neighbor.h;
                     neighbor.previous = current;
                 }
@@ -208,7 +306,7 @@ public class AStar {
         return null;
     }
 
-    private float dist (Spot a, Spot b) {
+    private float dist (SpotRealTime a, SpotRealTime b) {
         float iDist = Mathf.Abs (a.i - b.i);
         float jDist = Mathf.Abs (a.j - b.j);
         return Mathf.Sqrt ((iDist * iDist) + (jDist * jDist));
@@ -218,12 +316,12 @@ public class AStar {
         return grid.splits * 0.1f;
     }
 
-    public float heuristic_nonWall(Spot neighbor, Spot end)
+    public float heuristic_nonWall(SpotRealTime neighbor, SpotRealTime end)
     {
         return dist(neighbor, end);
     }
 
-    public float heuristic (Spot prev, Spot from, Spot neighbor, Spot end) {
+    public float heuristic (SpotRealTime prev, SpotRealTime from, SpotRealTime neighbor, SpotRealTime end) {
         float dist_n_goal = dist (neighbor, end);
         return dist_n_goal * (neighbor.value);
     }

@@ -62,8 +62,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 has_fetched = true;
             }
         }
-
-        List<Spot> path = new List<Spot>();
+        
         private void FixedUpdate()
         {
             if (loadTime > 0)
@@ -154,7 +153,7 @@ namespace UnityStandardAssets.Vehicles.Car
         {
             if (!can_update && can_run && enemies.Contains(current_target))
             {
-                nodesToGoal = astar.getPath(transform.position, true); //goal has already been loaded in updatePath
+                nodesToGoal = astar.getPath(); //goal has already been loaded in updatePath
                 if (nodesToGoal.Count > 0)
                 {
                     can_run = false;

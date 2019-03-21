@@ -48,22 +48,27 @@ namespace UnityStandardAssets.Vehicles.Car
         {
             if (Vector3.Distance(transform.position, enemies[0].transform.position) <= 3.0f)
             {
-                Debug.Log("reached target");
-                generator.reachedTarget = true;
-                respawn();
+              //  Debug.Log("reached target");
+                if (generator.saveTime(Time.time)) {
+                    respawn();
+                }
             }
         }
 
-        private void respawn() {
-            enemies.Clear();
+        //if car gets stuck or dont move to target within a time, it gets reseted
+        public void reset() {
             gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
             gameObject.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
             transform.position = generator.getStartPos();
             transform.eulerAngles = new Vector3(10, generator.getRotation(), 0);
+        }
+
+        private void respawn() {
+            enemies.Clear();
+            reset();
             current_target = null; //need to set to null to generate new path to next node
         }
 
-        List<Spot> path = new List<Spot>();
         private void FixedUpdate()
         {
             if (generator.canFetch() && !generator.hasFetched)
@@ -159,8 +164,8 @@ namespace UnityStandardAssets.Vehicles.Car
             remove_close_box();
             if (!can_update && can_run && enemies.Contains(current_target))
             {
-                nodesToGoal = astar.getPath(transform.position, true); //goal has already been loaded in updatePath
-                Debug.Log("goal: " + astar.goal.pos + " start: " + astar.start.pos);
+                nodesToGoal = astar.getPath(); //goal has already been loaded in updatePath
+                generator.setTime(); //reset the timer
                 if (nodesToGoal == null) {
                 } else
                 {

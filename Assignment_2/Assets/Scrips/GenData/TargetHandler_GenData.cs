@@ -10,14 +10,17 @@ public class TargetHandler_GenData
     public float angle { get; set; } = 0.0f;
     public int myStart { get; set; } = 0;
     public int targetIndex { get; set; } = 0;
-    private int angleInc = 90;
+    private int noNodes = 10;
+    private int angleInc = 45;
     private List<int> targetIndexes = new List<int>();
+    private int nodeInc = 5;
+    public int maxAngle { get; set; } = 180;
 
     public TargetHandler_GenData(TerrainInfo info) {
         addEnemies(info); //adding cubes to map
         generateTargets();
     }
-    
+
     //should be called after every new starting position
     private void generateTargets()
     {
@@ -26,7 +29,7 @@ public class TargetHandler_GenData
         angle = 0;
         targetIndex = 0;
         taken.Clear();
-        while (taken.Count < 20) {
+        while (taken.Count < noNodes) {
             int randomIndex = Random.Range(0, enemies.Count - 1);
 
             if (!taken.Contains(myStart)) {
@@ -41,7 +44,7 @@ public class TargetHandler_GenData
 
     //angle cant be increased anymore, resetting and caller should increment startpos
     public bool incrementAngle() {
-        if (angle + angleInc >= 360.0) {
+        if (angle + angleInc > maxAngle) {
             angle = 0;
             return false;
         }
@@ -54,10 +57,13 @@ public class TargetHandler_GenData
 
     //if returns false stop recording, should also generate targets after called
     public bool incrementStartPos() {
-        if (myStart +1 == enemies.Count) {
-            return false;
-        }
-        myStart++;
+        //if (myStart + nodeInc == enemies.Count) {
+        //    return false;
+       //}
+        myStart = Random.Range(0, enemies.Count - 1);
+        Debug.Log("targetindex: " + targetIndex);
+        targetIndex = 0;
+
         generateTargets();
         return true;
     }
@@ -69,6 +75,7 @@ public class TargetHandler_GenData
         }
 
         targetIndex++;
+       // Debug.Log("targetindex: " + targetIndex);
         return true;
     }
 
@@ -101,12 +108,10 @@ public class TargetHandler_GenData
                     // Debug.Log("creating cube at: " + x + ":" + z);
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.layer = 10; //Waypoint
-                    cube.transform.position = new Vector3(x, -0.40f, z);
+                    cube.transform.position = new Vector3(x, -0.0f, z);
                     enemies.Add(cube);
                 }
             }
         }
-
-        Debug.Log("enemies size: " + enemies.Count);
     }
 }
