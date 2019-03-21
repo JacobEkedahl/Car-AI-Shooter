@@ -17,6 +17,13 @@ namespace UnityStandardAssets.Vehicles.Car
         public GameObject[] friends;
         public GameObject[] enemies;
 
+        public GameObject index_assign_object;
+        CarIndexAssign index_assigner;
+
+        public int my_index;
+
+        public Coordinator coordinator;
+
         private void Start()
         {
             // get the car controller
@@ -29,71 +36,71 @@ namespace UnityStandardAssets.Vehicles.Car
             friends = GameObject.FindGameObjectsWithTag("Player");
             enemies = GameObject.FindGameObjectsWithTag("Enemy");
 
-
-
-            // Plan your path here
-            // ...
+            index_assigner = index_assign_object.GetComponent<CarIndexAssign>();
+            my_index = index_assigner.get_my_index();
+            coordinator = new Coordinator();
         }
 
 
         private void FixedUpdate()
         {
+            Vector3 target_position = coordinator.get_target_position(friends[0], this.gameObject, my_index);
+            Debug.DrawLine(target_position, transform.position, Color.cyan);
 
+            List<float> car_input = get_car_input(target_position);
+            float steering = car_input[0];
+            float acceleration = car_input[1];
 
-            // Execute your path here
-            // ...
+            m_Car.Move(steering, acceleration, acceleration, 0f);
 
-            Vector3 avg_pos = Vector3.zero;
-
-            foreach (GameObject friend in friends)
-            {
-                avg_pos += friend.transform.position;
-            }
-            avg_pos = avg_pos / friends.Length;
-            Vector3 direction = (avg_pos - transform.position).normalized;
+        }
+        private List<float> get_car_input(Vector3 target)
+        {
+            Vector3 direction = (target - transform.position).normalized;
 
             bool is_to_the_right = Vector3.Dot(direction, transform.right) > 0f;
             bool is_to_the_front = Vector3.Dot(direction, transform.forward) > 0f;
 
-            float steering = 0f;
+            float steering = (Vector3.Angle(direction, transform.forward));
+            if (steering >= 25f) {
+                steering = 1.0f;
+            } else {
+                steering /= 25.0f;
+                Debug.Log("new steering:" + steering);
+            }
+            
             float acceleration = 0;
 
             if (is_to_the_right && is_to_the_front)
             {
-                steering = 1f;
+                //steering = 1f;
                 acceleration = 1f;
             }
             else if (is_to_the_right && !is_to_the_front)
             {
-                steering = -1f;
+                steering *= -1f;
                 acceleration = -1f;
             }
             else if (!is_to_the_right && is_to_the_front)
             {
-                steering = -1f;
+                steering *= -1f;
                 acceleration = 1f;
             }
             else if (!is_to_the_right && !is_to_the_front)
             {
-                steering = 1f;
+                //steering = 1f;
                 acceleration = -1f;
             }
 
-            // this is how you access information about the terrain
-            int i = terrain_manager.myInfo.get_i_index(transform.position.x);
-            int j = terrain_manager.myInfo.get_j_index(transform.position.z);
-            float grid_center_x = terrain_manager.myInfo.get_x_pos(i);
-            float grid_center_z = terrain_manager.myInfo.get_z_pos(j);
+            if (m_Car.CurrentSpeed > 50) acceleration = 0;
+            if (m_Car.CurrentSpeed > 40 && Vector3.Distance(target, transform.position) < 8) acceleration = 0;
 
-            Debug.DrawLine(transform.position, new Vector3(grid_center_x, 0f, grid_center_z));
+            List<float> car_input = new List<float>();
+            car_input.Add(steering);
+            car_input.Add(acceleration);
 
-
-            // this is how you control the car
-            Debug.Log("Steering:" + steering + " Acceleration:" + acceleration);
-            m_Car.Move(steering, acceleration, acceleration, 0f);
-            //m_Car.Move(0f, -1f, 1f, 0f);
-
-
+            return car_input;
         }
     }
+    
 }
