@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,7 +6,6 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class AStar {
-    //public GridDiscretization grid {get; set;}
     public VoronoiGraph grid { get; set; }
     public SpotRealTime[, ] grid_spots { get; set; }
     public List<SpotRealTime> openSet { get; set; }
@@ -13,7 +13,7 @@ public class AStar {
 
     private Boolean turretTarget;
     public Vector3 start_pos;
-
+    
     public AStar (GridDiscretization grid, Boolean turretTarget) {
         //Debug.Log("grid: " + grid.toString());
         this.turretTarget = turretTarget;
@@ -36,6 +36,22 @@ public class AStar {
                 grid_spots[i, j].addNeighbors (grid_spots);
             }
         }
+    }
+
+    public AStar(VoronoiGraph grid, SpotRealTime[,] grid_spots, List<SpotRealTime> openSet, List<SpotRealTime> closedSet, bool turretTarget, Vector3 start_pos, SpotRealTime start, SpotRealTime goal)
+    {
+        this.grid = grid;
+        this.grid_spots = grid_spots;
+        this.openSet = openSet;
+        this.closedSet = closedSet;
+        this.turretTarget = turretTarget;
+        this.start_pos = start_pos;
+        this.start = start;
+        this.goal = goal;
+    }
+
+    public AStar()
+    {
     }
 
     private int[] findNonObstacle (int obj_i, int obj_j) {
@@ -156,7 +172,7 @@ public class AStar {
                 Debug.DrawLine(from, to, Color.blue, 50);
                 fracJourney = 0.0f;
             }
-            fracJourney += 1/(distance);
+            fracJourney += 0.05f;
         }
 
         result.Add(path[path.Count - 1]);
@@ -198,20 +214,18 @@ public class AStar {
         return true;
     }
 
-    public float getAngle(List<Vector3> path, Vector3 dir)
+    public float getAngleStart(Vector3 end, Vector3 dir)
     {
-        int index = 0;
-        for (int i = 0; i < path.Count; i++)
-        {
-            if (Vector3.Distance(path[i], start.pos) > 0)
-            {
-                index = i;
-                break;
-            }
-        }
+        return getAngle(start.pos, end, dir);
+    }
 
-        Vector3 targetDir = path[index] - start.pos;
-        Debug.DrawLine(start.pos, path[index], Color.red, 80);
+    public float getAngleEnd(Vector3 start, Vector3 dir) {
+        return getAngle(start, goal.pos, dir);
+    }
+
+    private float getAngle(Vector3 from, Vector3 to, Vector3 dir) {
+        Vector3 targetDir = to - from;
+        Debug.DrawLine(from, to, Color.red, 80);
         return Vector3.SignedAngle(targetDir, dir, Vector3.down);
     }
 
@@ -324,5 +338,38 @@ public class AStar {
     public float heuristic (SpotRealTime prev, SpotRealTime from, SpotRealTime neighbor, SpotRealTime end) {
         float dist_n_goal = dist (neighbor, end);
         return dist_n_goal * (neighbor.value);
+    }
+
+    public override bool Equals(object obj)
+    {
+        var star = obj as AStar;
+        return star != null &&
+               EqualityComparer<VoronoiGraph>.Default.Equals(grid, star.grid) &&
+               EqualityComparer<SpotRealTime[,]>.Default.Equals(grid_spots, star.grid_spots) &&
+               EqualityComparer<List<SpotRealTime>>.Default.Equals(openSet, star.openSet) &&
+               EqualityComparer<List<SpotRealTime>>.Default.Equals(closedSet, star.closedSet) &&
+               turretTarget == star.turretTarget &&
+               start_pos.Equals(star.start_pos) &&
+               EqualityComparer<SpotRealTime>.Default.Equals(start, star.start) &&
+               EqualityComparer<SpotRealTime>.Default.Equals(goal, star.goal);
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = -460371681;
+        hashCode = hashCode * -1521134295 + EqualityComparer<VoronoiGraph>.Default.GetHashCode(grid);
+        hashCode = hashCode * -1521134295 + EqualityComparer<SpotRealTime[,]>.Default.GetHashCode(grid_spots);
+        hashCode = hashCode * -1521134295 + EqualityComparer<List<SpotRealTime>>.Default.GetHashCode(openSet);
+        hashCode = hashCode * -1521134295 + EqualityComparer<List<SpotRealTime>>.Default.GetHashCode(closedSet);
+        hashCode = hashCode * -1521134295 + turretTarget.GetHashCode();
+        hashCode = hashCode * -1521134295 + EqualityComparer<Vector3>.Default.GetHashCode(start_pos);
+        hashCode = hashCode * -1521134295 + EqualityComparer<SpotRealTime>.Default.GetHashCode(start);
+        hashCode = hashCode * -1521134295 + EqualityComparer<SpotRealTime>.Default.GetHashCode(goal);
+        return hashCode;
+    }
+
+    public override string ToString()
+    {
+        return base.ToString();
     }
 }

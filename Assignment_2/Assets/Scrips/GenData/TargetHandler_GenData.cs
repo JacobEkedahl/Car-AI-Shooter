@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class TargetHandler_GenData
 {
-    public List<GameObject> enemies;
+    public List<GameObject> enemies { get; set; }
 
     public float angle { get; set; } = 0.0f;
     public int myStart { get; set; } = 0;

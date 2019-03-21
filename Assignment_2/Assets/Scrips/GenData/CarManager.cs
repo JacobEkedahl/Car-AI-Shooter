@@ -9,6 +9,7 @@ using UnityStandardAssets.Vehicles.Car;
 
 public class CarManager: MonoBehaviour
 {
+    public bool measureNodes;
     public bool measureAngles;
     public GameObject car;
     public GameObject terrain_manager_game_object;
@@ -30,18 +31,25 @@ public class CarManager: MonoBehaviour
     void Start()
     {
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
+        GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
         targetHandler = new TargetHandler_GenData(terrain_manager.myInfo);
         if (!measureAngles) {
             targetHandler.maxAngle = 0;
         }
+        
+        if (measureNodes) {
+            DataGenerator.generate(grid, targetHandler.enemies);
+            //NodesMap map = DataLoader.fetchMap();
 
-        GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1,1, 4);
+            //Debug.Log("time: " + map.getTime(map.getStartAngle(0,9), 0, 9));
+            //Debug.Log("is straight: " + map.getAngleRelStart(map.getStartAngle(0, 9), map.getStartAngle(0, 9)));
+        }
+        
         astar = new AStar(grid, false);
         carAI = car.GetComponent<CarAI>();
-
         car.transform.position = new Vector3(220.0f, 0.5f, 230.0f);
         car.transform.rotation = Quaternion.identity;
-      
+
         calculateDist();
         setTime();
     }
@@ -63,8 +71,10 @@ public class CarManager: MonoBehaviour
         path = astar.reconstructPath(path);
         distance = astar.dist_astar(path);
         car.transform.rotation = Quaternion.identity;
-        offset_angle = astar.getAngle(path, car.transform.forward);
-       // Debug.Log("offset: " + offset_angle);
+        Debug.Log("forward: " + car.transform.forward);
+        offset_angle = astar.getAngleStart(path[1], car.transform.forward);
+        astar.getAngleEnd(path[path.Count-2], car.transform.forward);
+        // Debug.Log("offset: " + offset_angle);
     }
 
     public float getRotation() {
@@ -95,7 +105,7 @@ public class CarManager: MonoBehaviour
    // private StringBuilder builder = new StringBuilder();
     private void updateBuilder() {
         if (distance != 0) {
-            Debug.Log(time + ":" + distance + ":" + angle);
+            //Debug.Log(time + ":" + distance + ":" + angle);
             DataSaver.save(time, distance, angle);
         }
     }
@@ -138,6 +148,9 @@ public class CarManager: MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
         Time.timeScale = 10.0f;
         if (Time.time - start_time > 160) {
             setTime();
