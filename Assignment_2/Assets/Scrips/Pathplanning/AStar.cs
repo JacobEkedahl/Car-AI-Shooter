@@ -172,7 +172,7 @@ public class AStar {
                 Debug.DrawLine(from, to, Color.blue, 50);
                 fracJourney = 0.0f;
             }
-            fracJourney += 0.05f;
+            fracJourney += (2/distance);
         }
 
         result.Add(path[path.Count - 1]);

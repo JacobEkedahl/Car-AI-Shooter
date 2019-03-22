@@ -354,7 +354,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 15251128}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0615546388c46a68ca4014cce1578b, type: 3}
+  m_Script: {fileID: 11500000, guid: b89dab38c1c239b4e99d4345cecf64b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 1358011048}
@@ -516,7 +516,7 @@ Transform:
   - {fileID: 311539666}
   - {fileID: 1778387633}
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &37962350
 GameObject:
@@ -17024,7 +17024,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 490120069}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0615546388c46a68ca4014cce1578b, type: 3}
+  m_Script: {fileID: 11500000, guid: b89dab38c1c239b4e99d4345cecf64b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 1358011048}
@@ -17186,7 +17186,7 @@ Transform:
   - {fileID: 246248419}
   - {fileID: 2116083676}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &508975016
 GameObject:
@@ -29792,7 +29792,7 @@ Transform:
   m_Children:
   - {fileID: 654249132}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1004648172
 MonoBehaviour:
@@ -29885,7 +29885,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1036884991}
   - component: {fileID: 1036884990}
-  - component: {fileID: 1036884992}
   m_Layer: 0
   m_Name: ClusterManager
   m_TagString: Untagged
@@ -29902,9 +29901,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1036884989}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 275eb5b29f79da54f9f76297b7380c3b, type: 3}
+  m_Script: {fileID: 11500000, guid: 8dba607c5f153794eb449925adc0fcfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  terrain_manager_game_object: {fileID: 1358011048}
+  enemies: []
+  current_car: 0
 --- !u!4 &1036884991
 Transform:
   m_ObjectHideFlags: 0
@@ -29917,23 +29919,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1036884992
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1036884989}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e6e187541ee05a941bf20b43c1758656, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  terrain_manager_game_object: {fileID: 1358011048}
-  enemies: []
-  current_car: 0
 --- !u!1 &1039683544
 GameObject:
   m_ObjectHideFlags: 0
@@ -34814,7 +34801,7 @@ Transform:
   - {fileID: 1776579610}
   - {fileID: 398397986}
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &1056474974
 Rigidbody:
@@ -34966,7 +34953,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1056475042}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0615546388c46a68ca4014cce1578b, type: 3}
+  m_Script: {fileID: 11500000, guid: b89dab38c1c239b4e99d4345cecf64b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 1358011048}
@@ -40769,7 +40756,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1309610592
 GameObject:
@@ -40888,7 +40875,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1395647781
 GameObject:
