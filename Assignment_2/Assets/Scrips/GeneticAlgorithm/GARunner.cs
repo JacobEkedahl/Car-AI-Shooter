@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿
+
 using GeneticSharp.Domain;
 using GeneticSharp.Domain.Crossovers;
 using GeneticSharp.Domain.Mutations;
@@ -7,29 +7,30 @@ using GeneticSharp.Domain.Populations;
 using GeneticSharp.Domain.Selections;
 using GeneticSharp.Domain.Terminations;
 using GeneticSharp.Infrastructure.Framework.Threading;
+using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
-public class GAController : MonoBehaviour
+public class GARunner
 {
-
-    public List<GameObject> enemies;
-    public GameObject terrain_manager_game_object;
-    TerrainManager terrain_manager;
+    //TspFitness have the internal implementation of distance. It needs a NodesMap.
+    //TspCity should be a integer
+    //This class should have the same functionality as GAController but return the List of GameObjects to navigate to in order
     private GeneticAlgorithm m_ga;
     private Thread m_gaThread;
+    private NodesMap map;
+    private int noNodes;
 
-    private LineRenderer m_lr;
-    
-    private void Start()
+    public GARunner(NodesMap map, int noNodes)
     {
-        terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
-        enemies = NodeGenerator.getObjects(terrain_manager.myInfo);
-
-        m_lr = GetComponent<LineRenderer>();
-        m_lr.positionCount = enemies.Count + 1;
-
-        var fitness = new TspFitness(enemies);
-        var chromosome = new TspChromosome(enemies.Count);
+        this.map = map;
+        this.noNodes = noNodes;
+    }
+    
+    public List<TspNode> getPath()
+    {
+        var fitness = new TspFitnessUpdated(map);
+        var chromosome = new TspChromosome(noNodes);
 
         // This operators are classic genetic algorithm operators that lead to a good solution on TSP,
         // but you can try others combinations and see what result you get.
@@ -39,7 +40,7 @@ public class GAController : MonoBehaviour
         var population = new Population(50, 100, chromosome);
 
         m_ga = new GeneticAlgorithm(population, fitness, selection, crossover, mutation);
-        m_ga.Termination = new TimeEvolvingTermination(System.TimeSpan.FromHours(1));
+        m_ga.Termination = new FitnessStagnationTermination();
 
         // The fitness evaluation of whole population will be running on parallel.
         m_ga.TaskExecutor = new ParallelTaskExecutor
@@ -58,6 +59,32 @@ public class GAController : MonoBehaviour
         // Starts the genetic algorithm in a separate thread.
         m_gaThread = new Thread(() => m_ga.Start());
         m_gaThread.Start();
+        m_gaThread.Join();
+
+        return findBestResult();
+    }
+
+    private List<TspNode> findBestResult()
+    {
+        List<TspNode> path = new List<TspNode>();
+        var c = m_ga.Population.CurrentGeneration.BestChromosome as TspChromosome;
+        if (c != null)
+        {
+            var genes = c.GetGenes();
+            var cities = ((TspFitnessUpdated)m_ga.Fitness).Cities;
+
+            for (int i = 0; i < genes.Length; i++)
+            {
+                var city = cities[(int)genes[i].Value];
+                Debug.Log("city " + i + ": " + city.Position);
+                path.Add(city);
+            }
+
+            var firstCity = cities[(int)genes[0].Value];
+            path.Add(firstCity);
+        }
+
+        return path;
     }
 
     private void OnDestroy()
@@ -65,30 +92,5 @@ public class GAController : MonoBehaviour
         // When the script is destroyed we stop the genetic algorithm and abort its thread too.
         m_ga.Stop();
         m_gaThread.Abort();
-    }
-
-    private void Update()
-    {
-        DrawRoute();
-    }
-
-    void DrawRoute()
-    {
-        var c = m_ga.Population.CurrentGeneration.BestChromosome as TspChromosome;
-
-        if (c != null)
-        {
-            var genes = c.GetGenes();
-            var cities = ((TspFitness)m_ga.Fitness).Cities;
-
-            for (int i = 0; i < genes.Length; i++)
-            {
-                var city = cities[(int)genes[i].Value];
-                m_lr.SetPosition(i, city.Position);
-            }
-
-            var firstCity = cities[(int)genes[0].Value];
-            m_lr.SetPosition(enemies.Count, firstCity.Position);
-        }
     }
 }

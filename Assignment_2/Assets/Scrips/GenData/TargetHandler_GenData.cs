@@ -10,14 +10,15 @@ public class TargetHandler_GenData
     public float angle { get; set; } = 0.0f;
     public int myStart { get; set; } = 0;
     public int targetIndex { get; set; } = 0;
-    private int noNodes = 10;
+    private int noNodes;
     private int angleInc = 45;
     private List<int> targetIndexes = new List<int>();
     private int nodeInc = 5;
     public int maxAngle { get; set; } = 180;
 
-    public TargetHandler_GenData(TerrainInfo info) {
-        enemies = NodeGenerator.getObjects(info);
+    public TargetHandler_GenData(List<GameObject> enemies) {
+        this.noNodes = 1;
+        this.enemies = enemies;
         generateTargets();
     }
 

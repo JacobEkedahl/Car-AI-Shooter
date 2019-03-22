@@ -12,9 +12,10 @@ namespace Assets.Scrips.GenData
     class DataSaver
     {
 
+        public static string prob1 = "Prob1/";
         private static string folder = Application.dataPath + "/Resources/Data/";
         public static string data_filename = "car_data";
-        public static string map_filename = "map.json";
+        public static string map_filename = "map";
         public static string map_data_filename = "mapData";
 
         public static void save(StringBuilder sb)
@@ -34,10 +35,10 @@ namespace Assets.Scrips.GenData
             sw.Close();
         }
 
-        public static void saveMapData(int i, int j, float distance, float startAngle, float endAngle)
+        public static void saveMapData(int i, int j, float distance, float startAngle, float endAngle, string problem)
         {
-            setup(folder + map_data_filename + ".csv", "i j distance startAngle endAngle");
-            StreamWriter sw = new StreamWriter(folder + map_data_filename + ".csv", true);
+            setup(folder + problem + map_data_filename + ".csv", "i j distance startAngle endAngle");
+            StreamWriter sw = new StreamWriter(folder + problem + map_data_filename + ".csv", true);
             sw.WriteLine(i.ToString() + " " + j.ToString() + " " + distance.ToString() + " " + startAngle.ToString() + " " + endAngle);
             sw.Close();
 
@@ -55,7 +56,7 @@ namespace Assets.Scrips.GenData
             }
         }
 
-        public static void saveMap(NodesMap map) {
+        public static void saveMap(NodesMap map, string problem) {
             Debug.Log("saving map..");
             MemoryStream stream1 = new MemoryStream();
             DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(NodesMap));
@@ -65,7 +66,7 @@ namespace Assets.Scrips.GenData
             stream1.Close();
 
             string res = Encoding.UTF8.GetString(json, 0, json.Length);
-            string path = folder + map_filename + ".json";
+            string path = folder + problem + map_filename + ".json";
             System.IO.File.WriteAllText(path, res);
 #if UNITY_EDITOR
             UnityEditor.AssetDatabase.Refresh();

@@ -4,7 +4,13 @@ using UnityEngine;
 
 public class NodeGenerator
 {
-    public static List<GameObject> getObjects(TerrainInfo info)
+    private TerrainInfo info;
+    public NodeGenerator(TerrainInfo info)
+    {
+        this.info = info;
+    }
+
+    public List<GameObject> getObjects()
     {
         List<GameObject> enemies = new List<GameObject>();
 
@@ -32,5 +38,32 @@ public class NodeGenerator
         }
 
         return enemies;
+    }
+
+    public List<GameObject> generateRandomObjects(int number)
+    {
+        List<GameObject> targets = getObjects();
+        List<GameObject> result = new List<GameObject>();
+
+        for (int i = 0; i < number; i++)
+        {
+            int randomIndex = Random.Range(0, targets.Count - 1);
+            while (result.Contains(targets[randomIndex]))
+            {
+                randomIndex = Random.Range(0, targets.Count - 1);
+            }
+
+            result.Add(targets[randomIndex]);
+        }
+
+        for (int i = targets.Count-1; i >= 0; i--)
+        {
+            if (!result.Contains(targets[i]))
+            {
+                targets[i] = null;
+            }
+        }
+
+        return result;
     }
 }

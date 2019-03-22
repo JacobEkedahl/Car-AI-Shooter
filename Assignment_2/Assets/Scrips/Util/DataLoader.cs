@@ -12,10 +12,10 @@ namespace Assets.Scrips.GenData
 {
     class DataLoader
     {
-        public static NodesMap fetchMap() {
+        public static NodesMap fetchMap(string problem) {
             NodesMap deserializedMap = new NodesMap();
 
-            string json = getJson();
+            string json = getJson(problem);
             MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(json));
             DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedMap.GetType());
             deserializedMap = ser.ReadObject(ms) as NodesMap;
@@ -23,11 +23,11 @@ namespace Assets.Scrips.GenData
             return deserializedMap;
         }
 
-        public static NodesMap createMapFromData()
+        public static NodesMap createMapFromData(string problem)
         {
             NodesMap map = new NodesMap();
 
-            TextAsset txt = (TextAsset)Resources.Load("Data/" + DataSaver.map_data_filename, typeof(TextAsset));
+            TextAsset txt = (TextAsset)Resources.Load("Data/" + problem + DataSaver.map_data_filename, typeof(TextAsset));
             string content = txt.text;
             string[] data = content.Split('\n');
             foreach(string d in data)
@@ -50,9 +50,8 @@ namespace Assets.Scrips.GenData
 
         }
 
-        private static string getJson() {
-            string path = "map.json";
-            string filePath = "Data/" + path.Replace(".json", "");
+        private static string getJson(string problem) {
+            string filePath = "Data/" + problem + DataSaver.map_filename;
             TextAsset targetFile = Resources.Load<TextAsset>(filePath);
             return targetFile.text;
         }

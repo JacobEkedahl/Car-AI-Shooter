@@ -26,25 +26,21 @@ public class CarManager: MonoBehaviour
     private float time;
 
     private AStar astar;
+    private static int noRandomNodes = 5;
 
     // Use this for initialization
     void Start()
     {
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
         GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
-        targetHandler = new TargetHandler_GenData(terrain_manager.myInfo);
+        NodeGenerator generator = new NodeGenerator(terrain_manager.myInfo);
+        List<GameObject> targets = generator.generateRandomObjects(noRandomNodes);
+        targetHandler = new TargetHandler_GenData(targets);
+
         if (!measureAngles) {
             targetHandler.maxAngle = 0;
         }
-        
-        if (measureNodes) {
-            DataGenerator.generate(grid, targetHandler.enemies);
-            //NodesMap map = DataLoader.fetchMap();
 
-            //Debug.Log("time: " + map.getTime(map.getStartAngle(0,9), 0, 9));
-            //Debug.Log("is straight: " + map.getAngleRelStart(map.getStartAngle(0, 9), map.getStartAngle(0, 9)));
-        }
-        
         astar = new AStar(grid, false);
         carAI = car.GetComponent<CarAI>();
         car.transform.position = new Vector3(220.0f, 0.5f, 230.0f);
@@ -149,7 +145,7 @@ public class CarManager: MonoBehaviour
     void Update()
     {
 #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
+        UnityEditor.EditorApplication.isPaused = true;
 #endif
         Time.timeScale = 10.0f;
         if (Time.time - start_time > 160) {

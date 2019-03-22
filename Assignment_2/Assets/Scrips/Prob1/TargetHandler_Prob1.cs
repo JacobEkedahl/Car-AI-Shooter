@@ -24,7 +24,8 @@ public class TargetHandler_Prob1 : MonoBehaviour
         //instantiate enemies
         //loop through the terrain and if not obstacle instatiate a cube
         TerrainInfo info = terrain_manager.myInfo;
-        enemies = NodeGenerator.getObjects(info);
+        NodeGenerator generator = new NodeGenerator(info);
+        enemies = generator.getObjects();
 
         no_clusters = GameObject.FindGameObjectsWithTag("Player").Length;
         no_enemies = enemies.Count;
