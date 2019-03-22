@@ -12,28 +12,37 @@ namespace Assets.Scrips.GenData
     class DataSaver
     {
 
-        public static string data_filename = "Assets/Resources/Data/car_data.csv";
+        private static string folder = Application.dataPath + "/Resources/Data/";
+        public static string data_filename = "car_data";
         public static string map_filename = "map.json";
+        public static string map_data_filename = "mapData";
 
         public static void save(StringBuilder sb)
         {
-            setup(data_filename, "Time Distance Angle");
+            setup(folder + data_filename + ".csv", "Time Distance Angle");
 
-            StreamWriter sw = new StreamWriter(data_filename, true);
+            StreamWriter sw = new StreamWriter(folder + data_filename + ".csv", true);
             sw.Write(sb.ToString());
             sw.Close();
         }
 
         public static void save(float time, float distance, float angle)
         {
-            setup(data_filename, "Time Distance Angle");
-            StreamWriter sw = new StreamWriter(data_filename, true);
+            setup(folder + data_filename + ".csv", "Time Distance Angle");
+            StreamWriter sw = new StreamWriter(folder + data_filename + ".csv", true);
             sw.WriteLine(time.ToString() + " " + distance.ToString() + " " + angle.ToString());
             sw.Close();
         }
 
+        public static void saveMapData(int i, int j, float distance, float startAngle, float endAngle)
+        {
+            setup(folder + map_data_filename + ".csv", "i j distance startAngle endAngle");
+            StreamWriter sw = new StreamWriter(folder + map_data_filename + ".csv", true);
+            sw.WriteLine(i.ToString() + " " + j.ToString() + " " + distance.ToString() + " " + startAngle.ToString() + " " + endAngle);
+            sw.Close();
 
-
+        }
+        
         private static void setup(string path, string firstLine) {
             if (!File.Exists(data_filename))
             {
@@ -56,7 +65,7 @@ namespace Assets.Scrips.GenData
             stream1.Close();
 
             string res = Encoding.UTF8.GetString(json, 0, json.Length);
-            string path = Application.dataPath + "/Resources/Data/" + map_filename;
+            string path = folder + map_filename + ".json";
             System.IO.File.WriteAllText(path, res);
 #if UNITY_EDITOR
             UnityEditor.AssetDatabase.Refresh();

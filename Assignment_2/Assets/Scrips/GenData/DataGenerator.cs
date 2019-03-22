@@ -24,9 +24,9 @@ namespace Assets.Scrips.GenData
             int nodesSize = nodes.Count;
             Vector3 forward = new Vector3(0.0f, 0.0f, 1.0f);
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 1; i++)
             {
-                for (int j = 0; j < 5; j++)
+                for (int j = 0; j < 100; j++)
                 {
                     if (i != j)
                     { //start not equal to finish
@@ -36,11 +36,16 @@ namespace Assets.Scrips.GenData
                         float distance = astar.dist_astar(path);
                         float startAngle = astar.getAngleStart(path[1], forward);
                         float endAngle = astar.getAngleEnd(path[path.Count - 2], forward);
-                        map.add(i, j, distance, startAngle, endAngle);
+                        DataSaver.saveMapData(i, j, distance, startAngle, endAngle);
                     }
                 }
             }
 
+#if UNITY_EDITOR
+            UnityEditor.AssetDatabase.Refresh();
+#endif
+
+            map = DataLoader.createMapFromData();
             DataSaver.saveMap(map);
         }
     }
