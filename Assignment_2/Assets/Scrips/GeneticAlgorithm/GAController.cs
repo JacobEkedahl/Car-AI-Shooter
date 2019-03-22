@@ -23,8 +23,8 @@ public class GAController : MonoBehaviour
     private void Start()
     {
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
-        addEnemies(terrain_manager.myInfo);
-        
+        enemies = NodeGenerator.getObjects(terrain_manager.myInfo);
+
         m_lr = GetComponent<LineRenderer>();
         m_lr.positionCount = enemies.Count + 1;
 
@@ -89,31 +89,6 @@ public class GAController : MonoBehaviour
 
             var firstCity = cities[(int)genes[0].Value];
             m_lr.SetPosition(enemies.Count, firstCity.Position);
-        }
-    }
-
-    public void addEnemies(TerrainInfo info)
-    {
-        enemies = new List<GameObject>();
-        int width = info.x_N;
-        int height = info.z_N;
-        float widthSquare = (info.x_high - info.x_low) / width;
-        float heightSquare = (info.z_high - info.z_low) / height;
-
-        for (int i = 0; i < width; i++)
-        {
-            for (int j = 0; j < height; j++)
-            {
-                if (info.traversability[i, j] != 1)
-                {
-                    float x = info.x_low + (i * widthSquare) + (widthSquare / 2);
-                    float z = info.x_low + (j * heightSquare) + (heightSquare / 2);
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.layer = 10; //Waypoint
-                    cube.transform.position = new Vector3(x, -0.0f, z);
-                    enemies.Add(cube);
-                }
-            }
         }
     }
 }

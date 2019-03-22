@@ -24,42 +24,10 @@ public class TargetHandler_Prob1 : MonoBehaviour
         //instantiate enemies
         //loop through the terrain and if not obstacle instatiate a cube
         TerrainInfo info = terrain_manager.myInfo;
-        addEnemies(info);
+        enemies = NodeGenerator.getObjects(info);
 
         no_clusters = GameObject.FindGameObjectsWithTag("Player").Length;
         no_enemies = enemies.Count;
-    }
-
-    public void addEnemies(TerrainInfo info)
-    {
-        enemies = new List<GameObject>();
-        int width = info.x_N;
-        int height = info.z_N;
-        float widthSquare = (info.x_high - info.x_low) / width;
-        float heightSquare = (info.z_high - info.z_low) / height;
-        //Debug.Log("square width and height: " + widthSquare + ":" + heightSquare + ":" + info.x_N + ":" + info.x_low + ":" + info.x_high);
-        List<string> res = new List<string>();
-
-        for (int i = 0; i < width; i ++)
-        {
-            string row = "";
-            for (int j = 0; j < height; j++)
-            {
-                row += info.traversability[i,j] + " ";
-                if (info.traversability[i,j] != 1)
-                {
-                    float x = info.x_low + (i * widthSquare) + (widthSquare / 2);
-                    float z = info.x_low + (j * heightSquare) + (heightSquare / 2);
-                   // Debug.Log("creating cube at: " + x + ":" + z);
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.layer = 10; //Waypoint
-                    cube.transform.position = new Vector3(x, -0.40f, z);
-                    enemies.Add(cube);
-                    //Debug.Log("cube: " + cube);
-                }
-            }
-            res.Add(row);
-        }
     }
 
     //cars call this method to get one of the generated clusters

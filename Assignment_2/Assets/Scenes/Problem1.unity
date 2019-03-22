@@ -354,7 +354,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 15251128}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0615546388c46a68ca4014cce1578b, type: 3}
+  m_Script: {fileID: 11500000, guid: b89dab38c1c239b4e99d4345cecf64b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 1358011048}
@@ -17024,7 +17024,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 490120069}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0615546388c46a68ca4014cce1578b, type: 3}
+  m_Script: {fileID: 11500000, guid: b89dab38c1c239b4e99d4345cecf64b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 1358011048}
@@ -29931,9 +29931,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6e187541ee05a941bf20b43c1758656, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrain_manager_game_object: {fileID: 1358011048}
-  enemies: []
-  current_car: 0
 --- !u!1 &1039683544
 GameObject:
   m_ObjectHideFlags: 0
@@ -34966,7 +34963,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1056475042}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0615546388c46a68ca4014cce1578b, type: 3}
+  m_Script: {fileID: 11500000, guid: b89dab38c1c239b4e99d4345cecf64b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 1358011048}

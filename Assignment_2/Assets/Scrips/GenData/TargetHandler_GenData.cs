@@ -17,7 +17,7 @@ public class TargetHandler_GenData
     public int maxAngle { get; set; } = 180;
 
     public TargetHandler_GenData(TerrainInfo info) {
-        addEnemies(info); //adding cubes to map
+        enemies = NodeGenerator.getObjects(info);
         generateTargets();
     }
 
@@ -87,31 +87,5 @@ public class TargetHandler_GenData
     {   
       //  Debug.Log("found obj: " + enemies[targetIndexes[targetIndex]] + " targetIndex: " + targetIndexes[targetIndex]);
         return enemies[targetIndexes[targetIndex]];
-    }
-    
-    public void addEnemies(TerrainInfo info)
-    {
-        enemies = new List<GameObject>();
-        int width = info.x_N;
-        int height = info.z_N;
-        float widthSquare = (info.x_high - info.x_low) / width;
-        float heightSquare = (info.z_high - info.z_low) / height;
-        
-        for (int i = 0; i < width; i++)
-        {
-            for (int j = 0; j < height; j++)
-            {
-                if (info.traversability[i, j] != 1)
-                {
-                    float x = info.x_low + (i * widthSquare) + (widthSquare / 2);
-                    float z = info.x_low + (j * heightSquare) + (heightSquare / 2);
-                    // Debug.Log("creating cube at: " + x + ":" + z);
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.layer = 10; //Waypoint
-                    cube.transform.position = new Vector3(x, -0.0f, z);
-                    enemies.Add(cube);
-                }
-            }
-        }
     }
 }
