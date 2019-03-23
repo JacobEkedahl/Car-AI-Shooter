@@ -55,7 +55,7 @@ public class SpotStandard {
         {
             col = Color.black;
         }
-        float offset = 0.1f;
+
         float size = 0.8f;
 
         Vector3 orig = new Vector3(pos.x + 0.1f, pos.y, pos.z + 0.1f);

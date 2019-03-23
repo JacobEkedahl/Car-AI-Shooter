@@ -1,5 +1,4 @@
-﻿using Assets.Scrips.GenData;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class GAConnector
@@ -8,8 +7,13 @@ public class GAConnector
     //problemtype = DataSaver.prob1 for example
     public static List<GameObject> getPath(List<GameObject> targets, string problem)
     {
+        if (targets.Count < 3)
+        {
+            return targets;
+        }
+
         NodesMap map = DataLoader.fetchMap(problem);
-        GARunner runner = new GARunner(map, targets.Count);
+        GARunner runner = new GARunner(map);
         List<TspNode> cities = runner.getPath();
         for (int i = 0; i < cities.Count - 1; i++)
         {
@@ -25,9 +29,24 @@ public class GAConnector
         return enemies;
     }
 
-    public static List<GameObject> logAndGetPath(GridDiscretization grid, List<GameObject> objects, string problem)
+    public static List<float> distance_route(List<GameObject> original, List<GameObject> route, string problem)
     {
-        DataGenerator.generate(grid, objects, problem);
+        NodesMap map = DataLoader.fetchMap(problem);
+        List<float> result = new List<float>();
+
+        for(int i = 0; i < route.Count-1; i++)
+        {
+            int startIndex = original.IndexOf(route[i]);
+            int nextIndex = original.IndexOf(route[i + 1]);
+            float distance = map.getDistance(startIndex, nextIndex);
+            result.Add(distance);
+        }
+        return result;
+    }
+
+    public static List<GameObject> logAndGetPath(GridDiscretization grid, List<GameObject> objects, string problem, bool know_turrets)
+    {
+        DataGenerator.generate(grid, objects, problem, know_turrets);
         return getPath(objects, problem);
     }
 }

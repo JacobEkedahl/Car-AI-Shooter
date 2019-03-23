@@ -1,10 +1,6 @@
-﻿using Assets.Scrips.GenData;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityStandardAssets.Vehicles.Car;
 
 public class CarManager: MonoBehaviour

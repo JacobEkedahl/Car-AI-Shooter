@@ -13,7 +13,7 @@ public class TargetHandler_GenData
     private int noNodes;
     private int angleInc = 45;
     private List<int> targetIndexes = new List<int>();
-    private int nodeInc = 5;
+   // private int nodeInc = 5;
     public int maxAngle { get; set; } = 180;
 
     public TargetHandler_GenData(List<GameObject> enemies) {

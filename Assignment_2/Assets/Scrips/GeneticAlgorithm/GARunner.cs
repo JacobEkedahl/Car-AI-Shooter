@@ -21,15 +21,16 @@ public class GARunner
     private NodesMap map;
     private int noNodes;
 
-    public GARunner(NodesMap map, int noNodes)
+    public GARunner(NodesMap map)
     {
         this.map = map;
-        this.noNodes = noNodes;
+        this.noNodes = map.getNodes().Count;
+        Debug.Log("no nodes: " + noNodes);
     }
     
     public List<TspNode> getPath()
     {
-        var fitness = new TspFitnessUpdated(map);
+        var fitness = new TspFitness(map);
         var chromosome = new TspChromosome(noNodes);
 
         // This operators are classic genetic algorithm operators that lead to a good solution on TSP,
@@ -71,7 +72,7 @@ public class GARunner
         if (c != null)
         {
             var genes = c.GetGenes();
-            var cities = ((TspFitnessUpdated)m_ga.Fitness).Cities;
+            var cities = ((TspFitness)m_ga.Fitness).Cities;
 
             for (int i = 0; i < genes.Length; i++)
             {
@@ -80,8 +81,9 @@ public class GARunner
                 path.Add(city);
             }
 
-            var firstCity = cities[(int)genes[0].Value];
-            path.Add(firstCity);
+            //if you include this you also have to include the same commented out lines in tspfitness
+         //   var firstCity = cities[(int)genes[0].Value];
+          //  path.Add(firstCity);
         }
 
         return path;

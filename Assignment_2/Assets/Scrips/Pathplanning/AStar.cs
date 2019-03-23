@@ -37,23 +37,7 @@ public class AStar {
             }
         }
     }
-
-    public AStar(VoronoiGraph grid, SpotRealTime[,] grid_spots, List<SpotRealTime> openSet, List<SpotRealTime> closedSet, bool turretTarget, Vector3 start_pos, SpotRealTime start, SpotRealTime goal)
-    {
-        this.grid = grid;
-        this.grid_spots = grid_spots;
-        this.openSet = openSet;
-        this.closedSet = closedSet;
-        this.turretTarget = turretTarget;
-        this.start_pos = start_pos;
-        this.start = start;
-        this.goal = goal;
-    }
-
-    public AStar()
-    {
-    }
-
+    
     private int[] findNonObstacle (int obj_i, int obj_j) {
         int[] result = new int[2];
         int size = 1;
@@ -115,6 +99,14 @@ public class AStar {
         }
     }
 
+    public float getDistance(Vector3 start_node, Vector3 goal_node)
+    {
+        initAstar(start_node, goal_node);
+        List<Vector3> path = getPath();
+        path = reconstructPath(path);
+        return dist_astar(path);
+    }
+
     public float dist_astar(List<Vector3> path)
     {
         float result = 0.0f;
@@ -131,6 +123,7 @@ public class AStar {
     public List<Vector3> reconstructPath(List<Vector3> path)
     {
         List<Vector3> result = new List<Vector3>();
+        //Debug.Log("path: " + path.Count);
         Vector3 start = path[0];
         Vector3 furthest = findFurthest(start, start, path);
         //Debug.Log("is furthest start: " + (start == furthest));

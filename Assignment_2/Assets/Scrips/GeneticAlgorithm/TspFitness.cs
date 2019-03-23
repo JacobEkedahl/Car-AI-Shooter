@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Assets.Scrips.GenData;
 using GeneticSharp.Domain.Chromosomes;
 using GeneticSharp.Domain.Fitnesses;
 using GeneticSharp.Domain.Randomizations;
 using UnityEngine;
 
-public class TspFitnessUpdated : IFitness
+public class TspFitness : IFitness
 {
     private Rect m_area;
     private static NodesMap map;
-    public TspFitnessUpdated(NodesMap incMap)
+    public TspFitness(NodesMap incMap)
     {
         map = incMap;
         Cities = new List<TspNode>();
@@ -22,6 +21,7 @@ public class TspFitnessUpdated : IFitness
 
         foreach(int index in map.getNodes())
         {
+            Debug.Log("adding.. " + index);
             var city = new TspNode { Position = index };
             Cities.Add(city);
         }
@@ -43,14 +43,14 @@ public class TspFitnessUpdated : IFitness
         foreach (var g in genes)
         {
             var currentCityIndex = Convert.ToInt32(g.Value, CultureInfo.InvariantCulture);
-            Debug.Log("currentCityIndex: " + currentCityIndex);
+           // Debug.Log("currentCityIndex: " + currentCityIndex);
             distanceSum += CalcDistanceTwoNodes(nextStartAngle, Cities[currentCityIndex], Cities[lastCityIndex]);
             lastCityIndex = currentCityIndex;
             citiesIndexes.Add(lastCityIndex);
             nextStartAngle = map.getEndAngle(Cities[currentCityIndex].Position, Cities[lastCityIndex].Position);
         }
 
-        distanceSum += CalcDistanceTwoNodes(nextStartAngle, Cities[citiesIndexes.Last()], Cities[citiesIndexes.First()]);
+      //  distanceSum += CalcDistanceTwoNodes(nextStartAngle, Cities[citiesIndexes.Last()], Cities[citiesIndexes.First()]);
         var fitness = 1.0 - (distanceSum / (Cities.Count * 1000.0));
 
         ((TspChromosome)chromosome).Distance = distanceSum;
@@ -80,11 +80,10 @@ public class TspFitnessUpdated : IFitness
 
     private static double CalcDistanceTwoNodes(float startAngle, TspNode one, TspNode two)
     {
-        if (startAngle < -400.0f)
-        {
-            Debug.Log("startangle");
+        //if (startAngle < -400.0f)
+        //{
             return map.getTime(one.Position, two.Position);
-        }
-        return map.getTime(startAngle, one.Position, two.Position);
+        //}
+      //  return map.getTime(startAngle, one.Position, two.Position);
     }
 }
