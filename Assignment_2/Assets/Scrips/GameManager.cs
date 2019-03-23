@@ -42,8 +42,7 @@ public class GameManager : MonoBehaviour {
         race_car.transform.rotation = Quaternion.identity;
 
         Random.InitState(random_seed);
-
-        /*
+        
         for(int i = 0; i < number_of_turrets; i++)
         {
             Vector3 pos = terrain_manager.myInfo.GetRandomFreePos();
@@ -62,15 +61,15 @@ public class GameManager : MonoBehaviour {
             Vector3 pos = new Vector3(185f, 0, 135 + 10 * i);
             pos.y = 2f;
             turret_list.Add(Instantiate(race_car, pos, Quaternion.identity));
-        }*/
+        }
 
         
     }
 
     // Update is called once per frame
     void Update () {
-    
-        /*
+
+        Time.timeScale = 5;
         turret_list.RemoveAll(item => item == null);
         turret_text.text = "Remaining turrets:" + turret_list.Count;    
 
@@ -82,6 +81,6 @@ public class GameManager : MonoBehaviour {
             }
             turret_text.text += " Mission Accomplished in " + completion_time.ToString("n2") + "seconds!";
 
-        }*/
+        }
     }
 }

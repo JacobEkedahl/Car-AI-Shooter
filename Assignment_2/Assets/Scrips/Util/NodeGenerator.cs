@@ -10,7 +10,7 @@ public class NodeGenerator
         this.info = info;
     }
 
-    public List<GameObject> getObjects()
+    public List<GameObject> prob1()
     {
         List<GameObject> enemies = new List<GameObject>();
 
@@ -40,9 +40,29 @@ public class NodeGenerator
         return enemies;
     }
 
+    /*Generate nodes at all the gridspaces as prob 1.
+     *Find nodes which only has one neighbour, on these path add the nodes which covers the least amount of nodes while covering the most area
+     *Use GeneticTsp for these nodes
+     *Recreate the path between the nodes and along the path remove nodes which can be seen from our total set.
+     *If any nodes are remaining let the third car take these. Otherwise let the third car navigate from the middle position on the path
+     */
+    public List<GameObject> prob2()
+    {
+
+        List<GameObject> enemies = new List<GameObject>();
+        
+        return enemies;
+    }
+
+    public List<GameObject> prob3()
+    {
+        List<GameObject> enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
+        return enemies;
+    }
+
     public List<GameObject> generateRandomObjects(int number)
     {
-        List<GameObject> targets = getObjects();
+        List<GameObject> targets = prob1();
         List<GameObject> result = new List<GameObject>();
 
         for (int i = 0; i < number; i++)

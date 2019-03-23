@@ -10799,7 +10799,7 @@ MonoBehaviour:
   m_MaxHandbrakeTorque: 100000000
   m_Downforce: 100
   m_SpeedType: 0
-  m_Topspeed: 150
+  m_Topspeed: 20
   m_RevRangeBoundary: 1
   m_SlipLimit: 0.3
   m_BrakeTorque: 20000
@@ -34224,7 +34224,7 @@ MonoBehaviour:
   m_MaxHandbrakeTorque: 100000000
   m_Downforce: 100
   m_SpeedType: 0
-  m_Topspeed: 150
+  m_Topspeed: 20
   m_RevRangeBoundary: 1
   m_SlipLimit: 0.3
   m_BrakeTorque: 20000
@@ -55497,6 +55497,7 @@ MonoBehaviour:
   number_of_extra_cars: 0
   random_seed: 7
   turret_text: {fileID: 1500313255}
+  turret_list: []
   weak_turrets: 1
   long_range_turrets: 0
 --- !u!4 &1981892164
@@ -76749,7 +76750,7 @@ MonoBehaviour:
   m_MaxHandbrakeTorque: 100000000
   m_Downforce: 100
   m_SpeedType: 0
-  m_Topspeed: 150
+  m_Topspeed: 20
   m_RevRangeBoundary: 1
   m_SlipLimit: 0.3
   m_BrakeTorque: 20000

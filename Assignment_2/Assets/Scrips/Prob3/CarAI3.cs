@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityStandardAssets.Vehicles.Car
 {
     [RequireComponent(typeof(CarController))]
-    public class CarAI2 : MonoBehaviour
+    public class CarAI3 : MonoBehaviour
     {
         private CarController m_Car; // the car controller we want to use
 
@@ -14,7 +14,7 @@ namespace UnityStandardAssets.Vehicles.Car
         EnemyPlanner enemy_planner;
 
         public GameObject cluster_manager_object;
-        TargetHandler_Prob1 target_handler;
+        TargetHandler target_handler;
 
         public GameObject[] friends;
         public List<GameObject> enemies;
@@ -28,9 +28,9 @@ namespace UnityStandardAssets.Vehicles.Car
         private void Start()
         {
             //Cluster manager, car ask for manager for which targets to find
-            target_handler = cluster_manager_object.GetComponent<TargetHandler_Prob1>();
+            target_handler = cluster_manager_object.GetComponent<TargetHandler>();
             //Debug.Log("value from targethandler: " + target_handler.no_clusters + ", enemies: " + target_handler.no_enemies);
-
+            
 
             // get the car controller
             m_Car = GetComponent<CarController>();
@@ -88,8 +88,7 @@ namespace UnityStandardAssets.Vehicles.Car
             if (go_back)
             {
                 go_back_routine(-1.0f);
-            }
-            else if (go_forward)
+            } else if (go_forward)
             {
                 go_back_routine(1.0f);
             }
@@ -109,15 +108,12 @@ namespace UnityStandardAssets.Vehicles.Car
             bool is_to_the_front = Vector3.Dot(direction, transform.forward) > 0f;
 
             float steering = (Vector3.Angle(direction, transform.forward));
-            if (steering >= 25f)
-            {
+            if (steering >= 25f) {
                 steering = 1.0f;
-            }
-            else
-            {
+            } else {
                 steering /= 25.0f;
             }
-
+            
             float acceleration = 0;
 
             if (is_to_the_right && is_to_the_front)
@@ -140,9 +136,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 //steering = 1f;
                 acceleration = -1f;
             }
-
-            if (m_Car.CurrentSpeed > 20) acceleration = 0;
-
+            
             List<float> car_input = new List<float>();
             car_input.Add(steering);
             car_input.Add(acceleration);
@@ -150,25 +144,11 @@ namespace UnityStandardAssets.Vehicles.Car
             return car_input;
         }
 
-        private void remove_close_box()
-        {
-            foreach (GameObject box in enemies)
-            {
-                if (box == null)
-                    continue;
-                if (Vector3.Distance(transform.position, box.transform.position) <= 3.0f)
-                {
-                    Destroy(box);
-                }
-            }
-        }
-
         //Methods used for pathplanning ---------------------------------------------------------
 
         private bool can_run = true;
         private void runAstar()
         {
-            remove_close_box();
             if (!can_update && can_run && enemies.Contains(current_target))
             {
                 nodesToGoal = astar.getPath(); //goal has already been loaded in updatePath
@@ -242,7 +222,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 go_forward = false;
             }
         }
-
+        
 
         private int timer = 100;
         private void OnDrawGizmos()
@@ -261,7 +241,7 @@ namespace UnityStandardAssets.Vehicles.Car
         private void OnCollisionStay(Collision other)
         {
             if (coll_timer == 100)
-            {
+            {   
                 if (other.gameObject.tag == "Player")
                 {
                     Debug.Log("Collision with another player!");
@@ -269,14 +249,12 @@ namespace UnityStandardAssets.Vehicles.Car
                     if (choice == 0)
                     {
                         go_back = true;
-                    }
-                    else
+                    } else
                     {
                         go_forward = true;
                         Debug.Log("not zero!");
                     }
-                }
-                else if (is_coll_back())
+                } else if (is_coll_back())
                 {
                     go_back = true;
                 }
@@ -321,7 +299,7 @@ namespace UnityStandardAssets.Vehicles.Car
 
             offset *= 2;
             Vector3 right_pos_forward = transform.position + offset_forward + offset;
-            Vector3 left_pos_forward = transform.position + offset_forward + -offset;
+            Vector3 left_pos_forward = transform.position + offset_forward + - offset;
             Vector3 right_pos_backward = transform.position + offset_backward + offset;
             Vector3 left_pos_backward = transform.position + offset_backward + -offset;
 

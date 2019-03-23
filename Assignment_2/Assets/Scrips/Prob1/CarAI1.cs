@@ -144,7 +144,6 @@ namespace UnityStandardAssets.Vehicles.Car
                 steering = 1.0f;
             } else {
                 steering /= 25.0f;
-                Debug.Log("new steering:" + steering);
             }
             
             float acceleration = 0;
@@ -169,8 +168,6 @@ namespace UnityStandardAssets.Vehicles.Car
                 //steering = 1f;
                 acceleration = -1f;
             }
-
-            if (m_Car.CurrentSpeed > 17) acceleration = 0;
 
             List<float> car_input = new List<float>();
             car_input.Add(steering);

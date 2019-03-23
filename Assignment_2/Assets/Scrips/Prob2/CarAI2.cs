@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityStandardAssets.Vehicles.Car
 {
     [RequireComponent(typeof(CarController))]
-    public class CarAI3 : MonoBehaviour
+    public class CarAI2 : MonoBehaviour
     {
         private CarController m_Car; // the car controller we want to use
 
@@ -14,7 +14,7 @@ namespace UnityStandardAssets.Vehicles.Car
         EnemyPlanner enemy_planner;
 
         public GameObject cluster_manager_object;
-        TargetHandler target_handler;
+        TargetHandler_Prob1 target_handler;
 
         public GameObject[] friends;
         public List<GameObject> enemies;
@@ -28,9 +28,9 @@ namespace UnityStandardAssets.Vehicles.Car
         private void Start()
         {
             //Cluster manager, car ask for manager for which targets to find
-            target_handler = cluster_manager_object.GetComponent<TargetHandler>();
+            target_handler = cluster_manager_object.GetComponent<TargetHandler_Prob1>();
             //Debug.Log("value from targethandler: " + target_handler.no_clusters + ", enemies: " + target_handler.no_enemies);
-            
+
 
             // get the car controller
             m_Car = GetComponent<CarController>();
@@ -88,7 +88,8 @@ namespace UnityStandardAssets.Vehicles.Car
             if (go_back)
             {
                 go_back_routine(-1.0f);
-            } else if (go_forward)
+            }
+            else if (go_forward)
             {
                 go_back_routine(1.0f);
             }
@@ -108,12 +109,15 @@ namespace UnityStandardAssets.Vehicles.Car
             bool is_to_the_front = Vector3.Dot(direction, transform.forward) > 0f;
 
             float steering = (Vector3.Angle(direction, transform.forward));
-            if (steering >= 25f) {
+            if (steering >= 25f)
+            {
                 steering = 1.0f;
-            } else {
+            }
+            else
+            {
                 steering /= 25.0f;
             }
-            
+
             float acceleration = 0;
 
             if (is_to_the_right && is_to_the_front)
@@ -136,9 +140,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 //steering = 1f;
                 acceleration = -1f;
             }
-
-            if (m_Car.CurrentSpeed > 20) acceleration = 0;
-
+            
             List<float> car_input = new List<float>();
             car_input.Add(steering);
             car_input.Add(acceleration);
@@ -146,11 +148,25 @@ namespace UnityStandardAssets.Vehicles.Car
             return car_input;
         }
 
+        private void remove_close_box()
+        {
+            foreach (GameObject box in enemies)
+            {
+                if (box == null)
+                    continue;
+                if (Vector3.Distance(transform.position, box.transform.position) <= 3.0f)
+                {
+                    Destroy(box);
+                }
+            }
+        }
+
         //Methods used for pathplanning ---------------------------------------------------------
 
         private bool can_run = true;
         private void runAstar()
         {
+            remove_close_box();
             if (!can_update && can_run && enemies.Contains(current_target))
             {
                 nodesToGoal = astar.getPath(); //goal has already been loaded in updatePath
@@ -224,7 +240,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 go_forward = false;
             }
         }
-        
+
 
         private int timer = 100;
         private void OnDrawGizmos()
@@ -243,7 +259,7 @@ namespace UnityStandardAssets.Vehicles.Car
         private void OnCollisionStay(Collision other)
         {
             if (coll_timer == 100)
-            {   
+            {
                 if (other.gameObject.tag == "Player")
                 {
                     Debug.Log("Collision with another player!");
@@ -251,12 +267,14 @@ namespace UnityStandardAssets.Vehicles.Car
                     if (choice == 0)
                     {
                         go_back = true;
-                    } else
+                    }
+                    else
                     {
                         go_forward = true;
                         Debug.Log("not zero!");
                     }
-                } else if (is_coll_back())
+                }
+                else if (is_coll_back())
                 {
                     go_back = true;
                 }
@@ -301,7 +319,7 @@ namespace UnityStandardAssets.Vehicles.Car
 
             offset *= 2;
             Vector3 right_pos_forward = transform.position + offset_forward + offset;
-            Vector3 left_pos_forward = transform.position + offset_forward + - offset;
+            Vector3 left_pos_forward = transform.position + offset_forward + -offset;
             Vector3 right_pos_backward = transform.position + offset_backward + offset;
             Vector3 left_pos_backward = transform.position + offset_backward + -offset;
 
@@ -348,113 +366,3 @@ namespace UnityStandardAssets.Vehicles.Car
         }
     }
 }
-
-/* Methods used when visualizing the pathfinding algorithm and car movement */
-
-/*
-    private void runAstar () {
-
-        if (astar.openSet.Count > 0 && can_run && !can_update && enemies.Contains (current_target)) {
-            Debug.Log ("calculating path in fixedupdate.., start: " + astar.start.wall + ", goal: " + astar.goal.wall + ", goalpos: " + astar.goal.pos + " target is null: " + (current_target == null));
-            var winner = 0;
-            for (int index = 0; index < astar.openSet.Count; index++) {
-                if (astar.openSet[index].f < astar.openSet[winner].f) {
-                    winner = index;
-                }
-            }
-
-            var current = astar.openSet[winner];
-
-            var goal = astar.goal;
-            int dist_to_goal = 3;
-            if (astar.grid.grid_distance[goal.i, goal.j] == -1) {
-                dist_to_goal = 5;
-            }
-            //find the path
-            if (Vector3.Distance (current.pos, astar.goal.pos) < dist_to_goal) {
-                nodesToGoal.Clear ();
-                var temp = current;
-                nodesToGoal.Add (temp.pos);
-
-                while (temp.previous != null) {
-                    nodesToGoal.Add (temp.previous.pos);
-                    temp = temp.previous;
-                }
-
-                int size_of_path = nodesToGoal.Count;
-                int modVal = 5;
-
-                if (size_of_path > 20) {
-                    modVal = 10;
-                } else if (size_of_path < 6) {
-                    modVal = 2;
-                }
-
-                for (int node_i = size_of_path - 1; node_i >= 0; node_i--) {
-                    if (node_i % modVal != 0) {
-                        Debug.Log ("removed");
-                        nodesToGoal.RemoveAt (node_i);
-                    }
-                }
-
-                nodesToGoal.Reverse ();
-
-                can_run = false;
-                DrawPath (nodesToGoal);
-
-                // findFurthestTarget ();
-                return;
-            }
-
-            astar.openSet.Remove (current);
-            astar.closedSet.Add (current);
-
-            var neighbors = current.neighbors;
-
-            for (int k = 0; k < neighbors.Count; k++) {
-                var neighbor = neighbors[k];
-                if (!astar.closedSet.Contains (neighbor) && !neighbor.wall) {
-                    var tempG = current.g + 1 * astar.getSplit ();
-
-                    if (astar.openSet.Contains (neighbor)) {
-                        if (tempG < neighbor.g) {
-                            neighbor.g = tempG;
-                        }
-                    } else {
-                        neighbor.g = tempG;
-                        astar.openSet.Add (neighbor);
-                    }
-
-                    neighbor.h = astar.heuristic (current.previous, current, neighbor, astar.goal);
-                    neighbor.f = neighbor.g + neighbor.h;
-                    neighbor.previous = current;
-                }
-            }
-            animateAstar ();
-        } else {
-            if (can_update) {
-                Debug.Log ("is updating");
-                updatePath ();
-            } else {
-                findFurthestTarget ();
-            }
-
-        }
-    }
-
-    private void animateAstar () {
-        foreach (Spot spot in astar.closedSet) {
-            spot.Draw (Color.red);
-        }
-
-        foreach (Spot spot in astar.openSet) {
-            spot.Draw (Color.green);
-        }
-    }
-
-    private void DrawPath (List<Vector3> path) {
-        for (int i = 0; i < path.Count - 1; i++) {
-            Debug.DrawLine (path[i], path[i + 1], Color.red, 100);
-        }
-    }
-    */
