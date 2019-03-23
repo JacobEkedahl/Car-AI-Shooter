@@ -5,7 +5,7 @@ public class Point {
         this.j = j;
     }
 
-    public string ToString () {
+    public override string ToString () {
         return "i:" + i + ";j:" + j;
     }
 }

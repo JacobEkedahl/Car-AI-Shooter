@@ -12,9 +12,10 @@ public class NodesMap
             
     }
 
-    public HashSet<int> getNodes()
+    public List<int> getNodes()
     {
         HashSet<int> set = new HashSet<int>();
+        List<int> indexes = new List<int>();
         foreach (KeyValuePair<string, PairData> entry in map)
         {
 
@@ -23,7 +24,12 @@ public class NodesMap
             set.Add(firstIndex);
         }
 
-        return set;
+        foreach(int index in set)
+        {
+            indexes.Add(index);
+        }
+
+        return indexes;
     }
 
     public void add(int i, int j, float distance, float startAngle, float endAngle) {
