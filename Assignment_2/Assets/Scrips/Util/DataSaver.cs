@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
-public class DataSaver
-{
+public class DataSaver {
 
     public static string prob1 = "Prob1/";
     public static string prob2 = "Prob2/";
@@ -19,8 +14,7 @@ public class DataSaver
     public static string map_filename = "map";
     public static string map_data_filename = "mapData";
 
-    public static void save(StringBuilder sb)
-    {
+    public static void save(StringBuilder sb) {
         setup(folder + data_filename + ".csv", "Time Distance Angle");
 
         StreamWriter sw = new StreamWriter(folder + data_filename + ".csv", true);
@@ -28,30 +22,26 @@ public class DataSaver
         sw.Close();
     }
 
-    public static void save(float time, float distance, float angle)
-    {
+    public static void save(float time, float distance, float angle) {
         setup(folder + data_filename + ".csv", "Time Distance Angle");
         StreamWriter sw = new StreamWriter(folder + data_filename + ".csv", true);
         sw.WriteLine(time.ToString() + " " + distance.ToString() + " " + angle.ToString());
         sw.Close();
     }
 
-    public static void saveMapData(int i, int j, float distance, float startAngle, float endAngle, string problem)
-    {
+    public static void saveMapData(int i, int j, float distance, float startAngle, float endAngle, string problem) {
         setup(folder + problem + map_data_filename + ".csv", "i j distance startAngle endAngle");
         StreamWriter sw = new StreamWriter(folder + problem + map_data_filename + ".csv", true);
         sw.WriteLine(i.ToString() + " " + j.ToString() + " " + distance.ToString() + " " + startAngle.ToString() + " " + endAngle);
         sw.Close();
 
     }
-        
+
     private static void setup(string path, string firstLine) {
-        if (!File.Exists(data_filename))
-        {
+        if (!File.Exists(data_filename)) {
             File.Create(data_filename).Dispose();
 
-            using (TextWriter tw = new StreamWriter(data_filename))
-            {
+            using (TextWriter tw = new StreamWriter(data_filename)) {
                 tw.WriteLine(firstLine);
             }
         }
@@ -62,7 +52,7 @@ public class DataSaver
         MemoryStream stream1 = new MemoryStream();
         DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(NodesMap));
         ser.WriteObject(stream1, map);
-            
+
         byte[] json = stream1.ToArray();
         stream1.Close();
 

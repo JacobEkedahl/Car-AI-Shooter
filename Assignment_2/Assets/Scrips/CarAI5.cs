@@ -27,9 +27,10 @@ namespace UnityStandardAssets.Vehicles.Car
             // note that both arrays will have holes when objects are destroyed
             // but for initial planning they should work
             friends = GameObject.FindGameObjectsWithTag("Player");
-            enemies = GameObject.FindGameObjectsWithTag("Enemy");
+            // enemies = GameObject.FindGameObjectsWithTag("Enemy");
 
-
+            NodeGenerator generator = new NodeGenerator(terrain_manager.myInfo);
+            List<GameObject> enemies = generator.prob2();
 
             // Plan your path here
             // ...

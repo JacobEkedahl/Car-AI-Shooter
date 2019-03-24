@@ -53661,7 +53661,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   problem: Prob3
-  create_node_map: 0
+  create_node_map: 1
   terrain_manager_game_object: {fileID: 1966902054}
   enemies: []
   current_car: 0
@@ -82080,7 +82080,7 @@ MonoBehaviour:
   turret: {fileID: 530427388, guid: 2a8e36ddf0fd44de2bd9497c29c36b67, type: 3}
   number_of_turrets: 10
   number_of_extra_cars: 0
-  random_seed: 7
+  random_seed: 4
   turret_text: {fileID: 1242275637}
   turret_list: []
   weak_turrets: 1

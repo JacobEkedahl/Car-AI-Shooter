@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour
-{
+public class GameManager : MonoBehaviour {
     public GameObject terrain_manager_game_object;
     TerrainManager terrain_manager;
 
@@ -27,17 +25,15 @@ public class GameManager : MonoBehaviour
     public bool weak_turrets;
     public bool long_range_turrets;
 
-    void Awake()
-    {
+    void Awake() {
 
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
-        
+
         race_car.transform.position = terrain_manager.myInfo.start_pos;
         race_car.transform.rotation = Quaternion.identity;
 
         Random.InitState(random_seed);
-        for (int i = 0; i < number_of_turrets; i++)
-        {
+        for (int i = 0; i < number_of_turrets; i++) {
             Vector3 pos = terrain_manager.myInfo.GetRandomFreePos();
             pos.y = 2f;
             //turret_list.Add(Instantiate(turret, pos, Quaternion.identity));
@@ -49,8 +45,7 @@ public class GameManager : MonoBehaviour
             turret_list.Add(turret_clone);
         }
 
-        for (int i = 0; i < number_of_extra_cars; i++)
-        {
+        for (int i = 0; i < number_of_extra_cars; i++) {
             Vector3 pos = new Vector3(185f, 0, 135 + 10 * i);
             pos.y = 2f;
             turret_list.Add(Instantiate(race_car, pos, Quaternion.identity));
@@ -58,23 +53,19 @@ public class GameManager : MonoBehaviour
     }
 
     // Use this for initialization
-    void Start()
-    {
+    void Start() {
         start_time = Time.time;
         completion_time = start_time - 1f;
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    void Update() {
         Time.timeScale = 1.0f;
         turret_list.RemoveAll(item => item == null);
         turret_text.text = "Remaining turrets:" + turret_list.Count;
 
-        if (turret_list.Count == 0)
-        {
-            if (completion_time < start_time)
-            {
+        if (turret_list.Count == 0) {
+            if (completion_time < start_time) {
                 completion_time = Time.time - start_time;
 
             }

@@ -1,38 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class DataGenerator
-{
+public class DataGenerator {
     //will log every distance between each node and startingangle and endangle
     //then save that log into a NodesMap object which is serialized
-    public static void generate(GridDiscretization grid, List<GameObject> objects, string problem, bool know_turrets)
-    {
+    public static void generate(GridDiscretization grid, List<GameObject> objects, string problem, bool know_turrets) {
         Debug.Log("problem: " + problem + "object size: " + objects.Count);
         List<Vector3> nodes = new List<Vector3>();
         NodesMap map = new NodesMap();
 
         AStar astar = new AStar(grid, know_turrets);
 
-        foreach (GameObject obj in objects)
-        {
+        foreach (GameObject obj in objects) {
             nodes.Add(obj.transform.position);
         }
 
         int nodesSize = nodes.Count;
         Vector3 forward = new Vector3(0.0f, 0.0f, 1.0f);
 
-            
-        for (int i = 0; i < nodesSize; i++)
-        {
-            for (int j = 0; j < nodesSize; j++)
-            {
-                if (i != j)
-                { //start not equal to finish
+
+        for (int i = 0; i < nodesSize; i++) {
+            for (int j = 0; j < nodesSize; j++) {
+                if (i != j) { //start not equal to finish
                     astar.initAstar(nodes[i], nodes[j]);
                     List<Vector3> path = astar.getPath();
                     path = astar.reconstructPath(path);
