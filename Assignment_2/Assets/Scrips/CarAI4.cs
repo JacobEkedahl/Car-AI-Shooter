@@ -75,8 +75,7 @@ namespace UnityStandardAssets.Vehicles.Car
                 direction = (target_car.transform.position - transform.position).normalized;
                 is_to_the_right = Vector3.Dot(direction, transform.right) > 0f;
                 if(!is_to_the_right) steering *= -1;
-                if(m_Car.CurrentSpeed > 3) {
-                    breaking = 2f;
+                if(m_Car.CurrentSpeed > 10) {
                     acceleration = 0;
                 }
                 car_input.Add(steering);

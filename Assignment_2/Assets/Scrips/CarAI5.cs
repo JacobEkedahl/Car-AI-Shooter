@@ -26,13 +26,12 @@ namespace UnityStandardAssets.Vehicles.Car {
 
             car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, terrain_manager, this.transform, 100, false, 100, false, target_handler, terrain_manager.myInfo);
         }
-        
+
 
         private void FixedUpdate() {
             car.go();
         }
 
-        
         private void OnCollisionExit(Collision other) {
             car.OnCollisionExit(other);
         }
