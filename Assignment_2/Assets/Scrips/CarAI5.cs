@@ -33,7 +33,7 @@ namespace UnityStandardAssets.Vehicles.Car {
             Coordinator coordinator = new Coordinator();
 
             //if(is_leader()){
-                car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, terrain_manager, this.transform, 100, false, 100, false, target_handler, terrain_manager.myInfo);
+            car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
             //} else {
                 //car = new FollowerCar(coordinator, index_assigner, my_index, m_Car, terrain_manager, this.transform, 100, false, 100, false, target_handler, terrain_manager.myInfo);
             //}
