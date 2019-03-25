@@ -81,6 +81,7 @@ namespace UnityStandardAssets.Vehicles.Car {
 
                     float steering = car_input[0];
                     float acceleration = car_input[1];
+                    float breaking = 0f;
 
                     if (current_target == null) {
                         replan();
@@ -91,11 +92,32 @@ namespace UnityStandardAssets.Vehicles.Car {
                     } else if (go_forward) {
                         go_back_routine(1.0f);
                     } else {
-                        m_Car.Move(steering, acceleration, acceleration, 0f);
+                        if(peek(this.gameObject, 10)){
+                            Debug.Log("Positive peek!");
+                            if(m_Car.CurrentSpeed > 6){
+                                acceleration = 0f;
+                                breaking = 1f;
+                            }
+                        }
+                        m_Car.Move(steering, acceleration, acceleration, breaking);
                     }
                 }
             }
 
+        }
+
+        private bool peek(GameObject leader_car, float peek_distance){
+            Vector3 look_ahead = leader_car.transform.position + leader_car.transform.forward * peek_distance;
+
+            for(int i = 0; i < enemies.Count; i++){
+                int layerMask = LayerMask.GetMask("CubeWalls");
+                if (enemies[i] == null) continue;
+                if (!Physics.Linecast(look_ahead, enemies[i].transform.position, layerMask)) {
+                    Debug.DrawLine(look_ahead, enemies[i].transform.position, Color.cyan);
+                    return true;
+                }
+            }
+            return false;
         }
 
 
@@ -204,7 +226,7 @@ namespace UnityStandardAssets.Vehicles.Car {
             astar.initAstar(transform.position, current_target.transform.position);
             currIndex = 0;
 
-            Debug.DrawLine(current_target.transform.position, transform.position, Color.blue, 100);
+            // Debug.DrawLine(current_target.transform.position, transform.position, Color.blue, 100);
             can_update = false;
         }
 
@@ -237,6 +259,8 @@ namespace UnityStandardAssets.Vehicles.Car {
         }
 
         private int timer = 100;
+
+        /* 
         private void OnDrawGizmos() {
             if (Application.isPlaying) {
                 if (nodesToGoal.Count > 0) {
@@ -264,6 +288,7 @@ namespace UnityStandardAssets.Vehicles.Car {
                 }
             }
         }
+        */
 
         private void OnCollisionExit(Collision other) {
             coll_timer = 100;
