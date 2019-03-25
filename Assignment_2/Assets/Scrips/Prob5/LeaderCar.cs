@@ -44,14 +44,14 @@ public class LeaderCar : MainCar {
             }
 
             if (normalRun()) {
-                m_Car.Move(steering, acceleration, acceleration, 0f);
+              /*  m_Car.Move(steering, acceleration, acceleration, 0f);
                 if(peek(car, 10)){
                     Debug.Log("Positive peek!");
                     if(m_Car.CurrentSpeed > 6){
                         acceleration = 0f;
                         breaking = 1f;
                     }
-                }
+                }*/
                 m_Car.Move(steering, acceleration, acceleration, breaking);
             }
         }
@@ -238,8 +238,19 @@ public class LeaderCar : MainCar {
         astar.openSet.Clear();
     }
 
+    private void remove_close_box() {
+        foreach (GameObject box in enemies) {
+            if (box == null)
+                continue;
+            if (Vector3.Distance(car.position, box.transform.position) <= 6.0f) {
+                Destroyer.destroyGameObject(box);
+            }
+        }
+    }
+
     private bool can_run = true;
     private void runAstar() {
+        remove_close_box();
         if (!can_update && can_run && enemies.Contains(current_target)) {
             nodesToGoal = astar.getPath(); //goal has already been loaded in updatePath
             if (nodesToGoal.Count > 0) {
@@ -264,6 +275,12 @@ public class LeaderCar : MainCar {
             enemies = target_handler.getCluster();
             Debug.Log("fetching cluster");
             has_fetched = true;
+        }
+    }
+
+    class Destroyer : MonoBehaviour {
+        public static void destroyGameObject(GameObject objectToDestroy) {
+            Destroy(objectToDestroy);
         }
     }
 

@@ -68,34 +68,38 @@ public class NodeGenerator {
         return enemies;
     }
 
-    public List<GameObject> getPriority(List<GameObject> myNodes, Vector3 carPos) {
-        Cluster cluster = new Cluster(3, info, myNodes);
-        List<GameObject> chosenCluster = myNodes;
-        cluster.run();
-        float minDist = float.MaxValue;
-        for(int i = 0; i < cluster.cluster_means.Count; i++) {
-            float dist = Vector3.Distance(cluster.cluster_means[i], carPos);
-            if (dist < minDist) {
-                minDist = dist;
-                chosenCluster = cluster.clusters[i];
+    //targets come in order, traverse the path and add cubes along this path
+    public List<GameObject> getCenterCubes(List<Vector3> totalPath) {
+
+        int width = info.x_N;
+        int height = info.z_N;
+        float widthSquare = (info.x_high - info.x_low) / width;
+        float heightSquare = (info.z_high - info.z_low) / height;
+
+        HashSet<string> nodesAdded = new HashSet<string>();
+        List<GameObject> result = new List<GameObject>();
+        
+        for(int i = 0; i < totalPath.Count; i++) {
+            int real_i = info.get_i_index(totalPath[i].x);
+            int real_j = info.get_i_index(totalPath[i].z);
+
+            string nodePos = real_i + "," + real_j;
+            if (!nodesAdded.Contains(nodePos) && info.traversability[real_i, real_j] != 1) {
+                nodesAdded.Add(nodePos);
+                result.Add(createCube(real_i, real_j, widthSquare, heightSquare));
             }
         }
 
-        return chosenCluster;
+        return result;
     }
-    
-    public GameObject createCube(int i, int j, float widthSquare, float heightSquare) {
 
-        float x = info.x_low + (i * widthSquare) + (widthSquare / 2);
-        float z = info.x_low + (j * heightSquare) + (heightSquare / 2);
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.layer = 10; //Waypoint
-        cube.transform.position = new Vector3(x, -0.0f, z);
-
-        return cube;
-    }
-    
     public List<GameObject> prob3() {
+        List<GameObject> enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
+        return enemies;
+    }
+
+    public List<GameObject> prob5(TerrainInfo info) {
+        this.info = info;
         List<GameObject> enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
         return enemies;
     }
@@ -120,5 +124,34 @@ public class NodeGenerator {
         }
 
         return result;
+    }
+
+
+
+    public List<GameObject> getPriority(List<GameObject> myNodes, Vector3 carPos) {
+        Cluster cluster = new Cluster(3, info, myNodes);
+        List<GameObject> chosenCluster = myNodes;
+        cluster.run();
+        float minDist = float.MaxValue;
+        for (int i = 0; i < cluster.cluster_means.Count; i++) {
+            float dist = Vector3.Distance(cluster.cluster_means[i], carPos);
+            if (dist < minDist) {
+                minDist = dist;
+                chosenCluster = cluster.clusters[i];
+            }
+        }
+
+        return chosenCluster;
+    }
+
+    public GameObject createCube(int i, int j, float widthSquare, float heightSquare) {
+
+        float x = info.x_low + (i * widthSquare) + (widthSquare / 2);
+        float z = info.x_low + (j * heightSquare) + (heightSquare / 2);
+        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cube.layer = 10; //Waypoint
+        cube.transform.position = new Vector3(x, -0.0f, z);
+
+        return cube;
     }
 }

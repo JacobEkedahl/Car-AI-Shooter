@@ -58,7 +58,7 @@ public class TargetHandler : MonoBehaviour {
                 break;
             case "Prob5":
                 no_clusters = 1;
-                enemies = generator.prob3();
+                enemies = generator.prob5(terrain_manager.myInfo);
                 astar = new AStar(grid, true);
 
                 //has fetch the enemies for this problem now need to cluster these enemies
@@ -68,7 +68,24 @@ public class TargetHandler : MonoBehaviour {
                 }
 
                 //now we have generated and saved our nodesmap, clustering should be based on astar distance
-                vrpClusters.Add(GAConnector.getPath(enemies, problem + "/"));
+                List<GameObject> unFilteredPath = GAConnector.getPath(enemies, problem + "/");
+                List<Vector3> totalPath = new List<Vector3>();
+
+                for (int i = 0; i < unFilteredPath.Count; i++) {
+                    Vector3 from = unFilteredPath[i % unFilteredPath.Count].transform.position;
+                    Vector3 to = unFilteredPath[(i+1) % unFilteredPath.Count].transform.position;
+
+                    astar.initAstar(from, to);
+                    List<Vector3> path = astar.getPath();
+                    path = astar.reconstructPath(path);
+                    totalPath.AddRange(path);
+                }
+
+                List<GameObject> cubes = generator.getCenterCubes(totalPath);
+                cubes = reorderRoute(GameObject.FindGameObjectsWithTag("Player")[0].transform.position, cubes);
+                //place cubes at center of a square along this distance and return this path
+                
+                vrpClusters.Add(cubes);
                 has_clustered = true;
                 break;
             default:

@@ -32,11 +32,13 @@ namespace UnityStandardAssets.Vehicles.Car {
             my_index = index_assigner.get_my_index();
             Coordinator coordinator = new Coordinator(5, 5);
 
-            if(is_leader()){
+            car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
+            /*
+            if (is_leader()){
                 car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
             } else {
                 car = new FollowerCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
-            }
+            }*/
         }
 
         private bool is_leader(){
@@ -47,6 +49,7 @@ namespace UnityStandardAssets.Vehicles.Car {
             }
             return false;
         }
+
         private bool peek(GameObject leader_car, float peek_distance){
             Vector3 look_ahead = leader_car.transform.position + leader_car.transform.forward * peek_distance;
 
