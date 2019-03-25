@@ -1,10 +1,13 @@
+using UnityStandardAssets.Vehicles.Car;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityStandardAssets.Vehicles.Car;
+using System;
 
 public class LeaderCar : MainCar {
 
     private AStar astar;
+    private Transform car;
     public int currIndex = -1; //which node to target   
     public List<GameObject> enemies { get; set; }
     public List<Vector3> nodesToGoal { get; set; } = new List<Vector3>();
@@ -16,6 +19,7 @@ public class LeaderCar : MainCar {
         enemy_planner = new EnemyPlanner();
         GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
         astar = new AStar(grid, true); //astar loads this grid into a internal voronoigrid, the targets are turrets
+        this.car = car;
     }
 
     public override void OnCollisionExit(Collision other) {
@@ -25,7 +29,7 @@ public class LeaderCar : MainCar {
     public override void OnCollisionStay(Collision other) {
         if (coll_timer == 100) {
             if (other.gameObject.tag == "Player") {
-                int choice = Random.Range(0, 2);
+                int choice = UnityEngine.Random.Range(0, 2);
                 if (choice == 0) {
                     go_back = true;
                 } else {
@@ -56,6 +60,7 @@ public class LeaderCar : MainCar {
 
             float steering = car_input[0];
             float acceleration = car_input[1];
+            float breaking = 0f;
 
             if (current_target == null) {
                 replan();
@@ -67,8 +72,29 @@ public class LeaderCar : MainCar {
                 go_back_routine(1.0f);
             } else {
                 m_Car.Move(steering, acceleration, acceleration, 0f);
+                if(peek(car, 10)){
+                    Debug.Log("Positive peek!");
+                    if(m_Car.CurrentSpeed > 6){
+                        acceleration = 0f;
+                        breaking = 1f;
+                    }
+                }
+                m_Car.Move(steering, acceleration, acceleration, breaking);
             }
         }
+    }
+    private bool peek(Transform car, float peek_distance){
+        Vector3 look_ahead = car.position + car.forward * peek_distance;
+
+        for(int i = 0; i < enemies.Count; i++){
+            int layerMask = LayerMask.GetMask("CubeWalls");
+            if (enemies[i] == null) continue;
+            if (!Physics.Linecast(look_ahead, enemies[i].transform.position, layerMask)) {
+                Debug.DrawLine(look_ahead, enemies[i].transform.position, Color.cyan);
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<float> get_car_input() {
