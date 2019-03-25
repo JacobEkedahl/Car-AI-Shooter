@@ -18,29 +18,6 @@ public class LeaderCar : MainCar {
         astar = new AStar(grid, true); //astar loads this grid into a internal voronoigrid, the targets are turrets
     }
 
-    public override void OnCollisionExit(Collision other) {
-        coll_timer = 100;
-    }
-
-    public override void OnCollisionStay(Collision other) {
-        if (coll_timer == 100) {
-            if (other.gameObject.tag == "Player") {
-                int choice = Random.Range(0, 2);
-                if (choice == 0) {
-                    go_back = true;
-                } else {
-                    go_forward = true;
-                }
-            } else if (is_coll_back()) {
-                go_back = true;
-            }
-        }
-
-        coll_timer--;
-        if (coll_timer <= 0)
-            coll_timer = 100;
-    }
-
     public override void go() {
         fetch_clusters();
 
@@ -61,11 +38,7 @@ public class LeaderCar : MainCar {
                 replan();
             }
 
-            if (go_back) {
-                go_back_routine(-1.0f);
-            } else if (go_forward) {
-                go_back_routine(1.0f);
-            } else {
+            if (normalRun()) {
                 m_Car.Move(steering, acceleration, acceleration, 0f);
             }
         }
@@ -231,22 +204,14 @@ public class LeaderCar : MainCar {
         can_update = false;
     }
 
-    //Methods used for dealing with collisions --------------------------------
-    private bool is_coll_back() {
-        Vector3 offset_forward = car.forward * 3;
-        Vector3 offset_side = car.right * 1;
-        Vector3 left_pos = car.position + offset_forward + offset_side;
-        Vector3 right_pos = car.position + offset_forward - offset_side;
-
-        int layerMask = LayerMask.GetMask("CubeWalls");
-
-        if ((Physics.Linecast(car.position, left_pos, layerMask)) ||
-            (Physics.Linecast(car.position, right_pos, layerMask))) {
-            return true;
-        }
-        return false;
+    private void replan() {
+        enemies = enemy_planner.remove_destroyed(enemies);
+        currIndex = 0;
+        can_run = true;
+        can_update = true;
+        astar.openSet.Clear();
     }
-    
+
     private bool can_run = true;
     private void runAstar() {
         if (!can_update && can_run && enemies.Contains(current_target)) {
@@ -259,25 +224,6 @@ public class LeaderCar : MainCar {
         } else {
             findFurthestTarget(); //normal running
         }
-    }
-
-    private void go_back_routine(float dir) {
-        if (timer > 0) {
-            timer--;
-            m_Car.Move(0.0f, dir, dir, 0.0f);
-        } else {
-            timer = 100;
-            go_back = false;
-            go_forward = false;
-        }
-    }
-
-    private void replan() {
-        enemies = enemy_planner.remove_destroyed(enemies);
-        currIndex = 0;
-        can_run = true;
-        can_update = true;
-        astar.openSet.Clear();
     }
 
 
