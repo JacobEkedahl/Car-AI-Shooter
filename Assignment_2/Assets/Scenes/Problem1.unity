@@ -49352,7 +49352,7 @@ MonoBehaviour:
   turret: {fileID: 530427388, guid: 2a8e36ddf0fd44de2bd9497c29c36b67, type: 3}
   number_of_turrets: 100
   number_of_extra_cars: 0
-  random_seed: 7
+  random_seed: 13
   turret_text: {fileID: 1128928045}
   turret_list: []
   weak_turrets: 1
@@ -49370,7 +49370,7 @@ Transform:
   m_Children:
   - {fileID: 654249132}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1036884989
 GameObject:
@@ -60157,7 +60157,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1395647781
 GameObject:

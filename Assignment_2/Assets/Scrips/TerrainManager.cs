@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json; // Import JSON.NET from Unity Asset store
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json; // Import JSON.NET from Unity Asset store
 
 
 public class TerrainManager : MonoBehaviour {
