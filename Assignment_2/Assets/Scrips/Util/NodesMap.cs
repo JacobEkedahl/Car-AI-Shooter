@@ -4,28 +4,24 @@ using System.Runtime.Serialization;
 using UnityEngine;
 
 [DataContract]
-public class NodesMap
-{
+public class NodesMap {
     [DataMember]
     public Dictionary<string, PairData> map { get; set; } = new Dictionary<string, PairData>();
     public NodesMap() {
-            
+
     }
 
-    public List<int> getNodes()
-    {
+    public List<int> getNodes() {
         HashSet<int> set = new HashSet<int>();
         List<int> indexes = new List<int>();
-        foreach (KeyValuePair<string, PairData> entry in map)
-        {
+        foreach (KeyValuePair<string, PairData> entry in map) {
 
             string key = entry.Key;
             int firstIndex = Int32.Parse(key.Substring(0, 1));
             set.Add(firstIndex);
         }
 
-        foreach(int index in set)
-        {
+        foreach (int index in set) {
             indexes.Add(index);
         }
 
@@ -44,8 +40,7 @@ public class NodesMap
     }
 
     //used to set the currangle
-    public float getEndAngle(int i, int j)
-    {
+    public float getEndAngle(int i, int j) {
         string p = i + ":" + j;
         if (map.ContainsKey(p))
             return map[p].getEndAngle();
@@ -53,8 +48,7 @@ public class NodesMap
     }
 
     public float getDistance(int i, int j) {
-        if (i == j)
-        {
+        if (i == j) {
             return 0.0f;
         }
         string p = i + ":" + j;
@@ -62,21 +56,19 @@ public class NodesMap
     }
 
     private const double a = 1.0, k = 1.1, d = 1.5, c = 1.0;
-    private const double constD = 0.13, addConst = 1.29; 
+    private const double constD = 0.13, addConst = 1.29;
     private double timeFormula(float angleRelStart, float distance) {
         Debug.Log("angle rel start: " + angleRelStart);
         double addon = Math.Sin(k * (angleRelStart - d)) + 1;
-        double distCalc = (distance * constD) -addConst;
+        double distCalc = (distance * constD) - addConst;
         return addon + distCalc;
     }
 
-    private double timeFormula(float distance)
-    {
+    private double timeFormula(float distance) {
         return (distance * constD) - addConst;
     }
 
-    public double getTime(int i, int j)
-    {
+    public double getTime(int i, int j) {
         return timeFormula(getDistance(i, j));
     }
 
@@ -100,8 +92,7 @@ public class NodesMap
     }
 
     [DataContract]
-    public class PairData
-    {
+    public class PairData {
         [DataMember]
         public float distance { get; set; }
         [DataMember]
@@ -109,25 +100,21 @@ public class NodesMap
         [DataMember]
         public float endAngle { get; set; }
 
-        public PairData(float d, float s, float e)
-        {
+        public PairData(float d, float s, float e) {
             this.distance = d;
             this.startAngle = s;
             this.endAngle = e;
         }
 
-        public float getDistance()
-        {
+        public float getDistance() {
             return distance;
         }
 
-        public float getStartAngle()
-        {
+        public float getStartAngle() {
             return startAngle;
         }
 
-        public float getEndAngle()
-        {
+        public float getEndAngle() {
             return endAngle;
         }
     }

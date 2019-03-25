@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,8 +14,7 @@ public class SpotStandard {
     public bool wall { get; set; }
     public float value { get; set; }
 
-    public SpotStandard(float x, float z, int i, int j, bool wall, float value)
-    {
+    public SpotStandard(float x, float z, int i, int j, bool wall, float value) {
         previous = null;
         this.i = i;
         this.j = j;
@@ -29,8 +26,7 @@ public class SpotStandard {
         this.value = value;
     }
 
-    public SpotStandard(float x, float z, int i, int j, bool wall)
-    {
+    public SpotStandard(float x, float z, int i, int j, bool wall) {
         previous = null;
         this.i = i;
         this.j = j;
@@ -41,18 +37,15 @@ public class SpotStandard {
         this.wall = wall;
     }
 
-    public void clear()
-    {
+    public void clear() {
         this.g = 1.0f;
         this.f = 0.0f;
         this.h = 0.0f;
         previous = null;
     }
 
-    public void Draw(Color col)
-    {
-        if (this.wall)
-        {
+    public void Draw(Color col) {
+        if (this.wall) {
             col = Color.black;
         }
 
@@ -76,48 +69,39 @@ public class SpotStandard {
 
     }
 
-    public void addNeighbors(SpotStandard[,] grid)
-    {
+    public void addNeighbors(SpotStandard[,] grid) {
         neighbors = new List<SpotStandard>();
 
-        if (this.i < grid.GetLength(0) - 1)
-        {
+        if (this.i < grid.GetLength(0) - 1) {
             neighbors.Add(grid[this.i + 1, this.j]);
         }
 
-        if (this.i > 0)
-        {
+        if (this.i > 0) {
             neighbors.Add(grid[this.i - 1, this.j]);
         }
 
-        if (this.j < grid.GetLength(1) - 1)
-        {
+        if (this.j < grid.GetLength(1) - 1) {
             neighbors.Add(grid[this.i, this.j + 1]);
         }
 
-        if (this.j > 0)
-        {
+        if (this.j > 0) {
             neighbors.Add(grid[this.i, this.j - 1]);
         }
 
         //corners
-        if (this.i > 0 && this.j > 0)
-        {
+        if (this.i > 0 && this.j > 0) {
             neighbors.Add(grid[this.i - 1, this.j - 1]);
         }
 
-        if (this.i < grid.GetLength(0) - 1 && this.j > 0)
-        {
+        if (this.i < grid.GetLength(0) - 1 && this.j > 0) {
             neighbors.Add(grid[this.i + 1, this.j - 1]);
         }
 
-        if (this.i > 0 && this.j < grid.GetLength(1) - 1)
-        {
+        if (this.i > 0 && this.j < grid.GetLength(1) - 1) {
             neighbors.Add(grid[this.i - 1, this.j + 1]);
         }
 
-        if (this.i < grid.GetLength(0) - 1 && this.j < grid.GetLength(1) - 1)
-        {
+        if (this.i < grid.GetLength(0) - 1 && this.j < grid.GetLength(1) - 1) {
             neighbors.Add(grid[this.i + 1, this.j + 1]);
         }
     }

@@ -1,36 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Scrips.PathHandlers
-{
-    class TargetFilter
-    {
-        public static List<GameObject> filter(List<CubeTarget> targets)
-        {
+namespace Assets.Scrips.PathHandlers {
+    class TargetFilter {
+        public static List<GameObject> filter(List<CubeTarget> targets) {
             List<CubeTarget> chosenTargets = new List<CubeTarget>();
             List<GameObject> I = new List<GameObject>();
             List<GameObject> enemies = new List<GameObject>();
-            
+
             enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
             Debug.Log("trying to find enemies, " + enemies.Count);
-          //  for (int i = 0; i < 10; i++) { 
+            //  for (int i = 0; i < 10; i++) { 
             while (!isEqual(I, enemies)) {
                 int biggestDifference = int.MinValue;
                 CubeTarget chosenTarget = null;
-                foreach (CubeTarget target in targets)
-                {
+                foreach (CubeTarget target in targets) {
                     HashSet<GameObject> tmp = new HashSet<GameObject>(I);
                     int sizeBefore = tmp.Count;
                     tmp.UnionWith(target.getLineofSightObj());
                     int sizeAfter = tmp.Count;
                     int difference = sizeAfter - sizeBefore;
 
-                    if (difference > biggestDifference)
-                    {
+                    if (difference > biggestDifference) {
                         biggestDifference = difference;
                         chosenTarget = target;
                     }
@@ -43,8 +35,7 @@ namespace Assets.Scrips.PathHandlers
             }
 
             List<GameObject> result = new List<GameObject>();
-            foreach (CubeTarget target in chosenTargets)
-            {
+            foreach (CubeTarget target in chosenTargets) {
                 result.Add(target.getCube());
             }
             Debug.Log("returned result: " + result.Count);
@@ -52,12 +43,10 @@ namespace Assets.Scrips.PathHandlers
             return result;
         }
 
-        private static Boolean isEqual(List<GameObject> targets, List<GameObject> enemies)
-        {
+        private static Boolean isEqual(List<GameObject> targets, List<GameObject> enemies) {
             HashSet<GameObject> tmpTargets = new HashSet<GameObject>(targets);
             HashSet<GameObject> tmpEnemies = new HashSet<GameObject>(enemies);
-            if (tmpTargets.Count != tmpEnemies.Count)
-            {
+            if (tmpTargets.Count != tmpEnemies.Count) {
                 Debug.Log("not equal: " + tmpTargets.Count + ":" + tmpEnemies.Count);
                 return false;
             }
@@ -65,6 +54,6 @@ namespace Assets.Scrips.PathHandlers
             Debug.Log("equal: " + tmpTargets.Count + ":" + tmpEnemies.Count);
             return true;
         }
-        
+
     }
 }

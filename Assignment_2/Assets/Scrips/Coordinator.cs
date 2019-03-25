@@ -1,7 +1,6 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class Coordinator {
 
@@ -9,7 +8,7 @@ public class Coordinator {
 
     List<float> left_offsets;
     List<float> backward_offsets;
-    public Coordinator(){
+    public Coordinator() {
         left_offsets = new List<float>();
         backward_offsets = new List<float>();
         left_offsets.Add(20);
@@ -23,20 +22,20 @@ public class Coordinator {
         backward_offsets.Add(20);
     }
 
-    public void setFirstCarName(GameObject car){
+    public void setFirstCarName(GameObject car) {
         nameToIndex[car.name] = 1;
     }
-    public void setSecondCarName(GameObject car){
+    public void setSecondCarName(GameObject car) {
         nameToIndex[car.name] = 2;
     }
-    public void setThirdCarName(GameObject car){
+    public void setThirdCarName(GameObject car) {
         nameToIndex[car.name] = 3;
     }
-    public void setFourthCarName(GameObject car){
+    public void setFourthCarName(GameObject car) {
         nameToIndex[car.name] = 4;
     }
 
-    public Vector3 get_target_position(GameObject leader, GameObject car, int index){
+    public Vector3 get_target_position(GameObject leader, GameObject car, int index) {
         Vector3 leader_position = leader.transform.position;
         Vector3 leader_direction = leader.transform.forward;
         Vector3 right = new Vector3(leader_direction.z, leader_direction.y, -leader_direction.x);
