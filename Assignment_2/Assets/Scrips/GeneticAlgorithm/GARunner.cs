@@ -49,7 +49,7 @@ public class GARunner {
         // Everty time a generation ends, we log the best solution.
         m_ga.GenerationRan += delegate {
             var distance = ((TspChromosome)m_ga.BestChromosome).Distance;
-            Debug.Log($"Generation: {m_ga.GenerationsNumber} - Distance: ${distance}");
+          //  Debug.Log($"Generation: {m_ga.GenerationsNumber} - Distance: ${distance}");
         };
 
         // Starts the genetic algorithm in a separate thread.
@@ -69,7 +69,6 @@ public class GARunner {
 
             for (int i = 0; i < genes.Length; i++) {
                 var city = cities[(int)genes[i].Value];
-                Debug.Log("city " + i + ": " + city.Position);
                 path.Add(city);
             }
 

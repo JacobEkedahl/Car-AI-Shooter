@@ -38,7 +38,7 @@ namespace UnityStandardAssets.Vehicles.Car
 
             index_assigner = index_assign_object.GetComponent<CarIndexAssign>();
             my_index = index_assigner.get_my_index();
-            coordinator = new Coordinator(45, 55);
+            coordinator = new Coordinator(45, 55, 10);
         }
 
 

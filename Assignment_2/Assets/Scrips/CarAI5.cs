@@ -30,41 +30,26 @@ namespace UnityStandardAssets.Vehicles.Car {
             //for followers
             CarIndexAssign index_assigner = index_assign_object.GetComponent<CarIndexAssign>();
             my_index = index_assigner.get_my_index();
-            Coordinator coordinator = new Coordinator(5, 5);
-
-            car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
-            /*
+            Coordinator coordinator = new Coordinator(5, 5, 0);
+            
             if (is_leader()){
                 car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
             } else {
                 car = new FollowerCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
-            }*/
+            }
         }
 
         private bool is_leader(){
             for(int i = 0; i < friends.Length; i++){
                 if(friends[i] != null && i == my_index){
+                    Debug.Log("I am leader: " + i);
                     return true;
                 }
             }
             return false;
         }
 
-        private bool peek(GameObject leader_car, float peek_distance){
-            Vector3 look_ahead = leader_car.transform.position + leader_car.transform.forward * peek_distance;
-
-            for(int i = 0; i < enemies.Length; i++){
-                int layerMask = LayerMask.GetMask("CubeWalls");
-                if (enemies[i] == null) continue;
-                if (!Physics.Linecast(look_ahead, enemies[i].transform.position, layerMask)) {
-                    Debug.DrawLine(look_ahead, enemies[i].transform.position, Color.cyan);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-
+   
         private void FixedUpdate() {
             car.go();
         }

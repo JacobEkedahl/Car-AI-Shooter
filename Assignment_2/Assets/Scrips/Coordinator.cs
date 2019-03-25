@@ -11,7 +11,7 @@ public class Coordinator {
 
     float width;
     float length;
-    public Coordinator(float width, float length){
+    public Coordinator(float width, float length, float offset){
         this.width = width;
         this.length = length;
         left_offsets = new List<float>();
@@ -23,8 +23,8 @@ public class Coordinator {
 
         backward_offsets.Add(length);
         backward_offsets.Add(length/2);
-        backward_offsets.Add(length/2 + 10);
-        backward_offsets.Add(length + 10);
+        backward_offsets.Add(length/2 + offset);
+        backward_offsets.Add(length + offset);
     }
 
     public Vector3 get_target_position(GameObject leader, GameObject car, int index){

@@ -96,7 +96,7 @@ public class TargetHandler : MonoBehaviour {
     }
 
     private void generateCluster() {
-        Debug.Log("enemies count: " + enemies.Count);
+        //Debug.Log("enemies count: " + enemies.Count);
         Cluster cluster = new Cluster(no_clusters, terrain_manager, enemies);
         cluster.run();
         List<Vector3> means = cluster.cluster_means;
@@ -111,7 +111,7 @@ public class TargetHandler : MonoBehaviour {
             //last cluster
             if (i == no_clusters - 1) {
                 chunk = chunk + (route.Count - chunk * no_clusters);
-                Debug.Log("new chunk: " + chunk);
+                //Debug.Log("new chunk: " + chunk);
             }
             List<GameObject> cluster = new List<GameObject>();
             for (int j = 0; j < (route.Count + chunk); j++) {

@@ -28,7 +28,7 @@ public class LeaderCar : MainCar {
         if (has_fetched) {
             runAstar();
 
-            Debug.Log("enemies: " + enemies.Count);
+            //Debug.Log("enemies: " + enemies.Count);
 
             List<float> car_input = get_car_input();
             if (car_input == null) {
@@ -44,14 +44,14 @@ public class LeaderCar : MainCar {
             }
 
             if (normalRun()) {
-              /*  m_Car.Move(steering, acceleration, acceleration, 0f);
+                m_Car.Move(steering, acceleration, acceleration, 0f);
                 if(peek(car, 10)){
                     Debug.Log("Positive peek!");
                     if(m_Car.CurrentSpeed > 6){
                         acceleration = 0f;
                         breaking = 1f;
                     }
-                }*/
+                }
                 m_Car.Move(steering, acceleration, acceleration, breaking);
             }
         }
