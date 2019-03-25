@@ -1,47 +1,46 @@
-﻿using Assets.Scrips.GenData;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityStandardAssets.Vehicles.Car;
 
-public class CarManager: MonoBehaviour
-{
+public class CarManager : MonoBehaviour {
+    public bool measureNodes;
     public bool measureAngles;
     public GameObject car;
     public GameObject terrain_manager_game_object;
     TerrainManager terrain_manager;
     TargetHandler_GenData targetHandler;
     CarAI carAI;
-    
+
     private float start_time;
     private float completion_time;
-    
+
     //data to save
     private float distance;
     private float angle;
     private float time;
 
     private AStar astar;
+    private static int noRandomNodes = 5;
 
     // Use this for initialization
-    void Start()
-    {
+    void Start() {
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
-        targetHandler = new TargetHandler_GenData(terrain_manager.myInfo);
+        GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
+        NodeGenerator generator = NodeGenerator.getInstance();
+
+        List<GameObject> targets = generator.generateRandomObjects(noRandomNodes, terrain_manager.myInfo);
+        targetHandler = new TargetHandler_GenData(targets);
+
         if (!measureAngles) {
             targetHandler.maxAngle = 0;
         }
 
-        GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1,1, 4);
         astar = new AStar(grid, false);
         carAI = car.GetComponent<CarAI>();
-
         car.transform.position = new Vector3(220.0f, 0.5f, 230.0f);
         car.transform.rotation = Quaternion.identity;
-      
+
         calculateDist();
         setTime();
     }
@@ -59,26 +58,28 @@ public class CarManager: MonoBehaviour
 
         astar.initAstar(start, goal);
         List<Vector3> path = astar.getPath();
-        
+
         path = astar.reconstructPath(path);
         distance = astar.dist_astar(path);
         car.transform.rotation = Quaternion.identity;
-        offset_angle = astar.getAngle(path, car.transform.forward);
-       // Debug.Log("offset: " + offset_angle);
+        Debug.Log("forward: " + car.transform.forward);
+        offset_angle = astar.getAngleStart(path[1], car.transform.forward);
+        astar.getAngleEnd(path[path.Count - 2], car.transform.forward);
+        // Debug.Log("offset: " + offset_angle);
     }
 
     public float getRotation() {
         angle = targetHandler.angle;
         return angle + offset_angle;
     }
-    
+
     public Vector3 getStartPos() {
         Vector3 newPos = targetHandler.getStartPos().transform.position;
         newPos.y = 0.5f;
         return newPos;
     }
 
-    public bool canFetch () {
+    public bool canFetch() {
         return targetHandler != null;
     }
 
@@ -92,52 +93,48 @@ public class CarManager: MonoBehaviour
         return objects;
     }
 
-   // private StringBuilder builder = new StringBuilder();
+    // private StringBuilder builder = new StringBuilder();
     private void updateBuilder() {
         if (distance != 0) {
-            Debug.Log(time + ":" + distance + ":" + angle);
+            //Debug.Log(time + ":" + distance + ":" + angle);
             DataSaver.save(time, distance, angle);
         }
     }
 
     private void save() {
         Debug.Log("saving....");
-      //  DataSaver.save(builder);
+        //  DataSaver.save(builder);
         EditorApplication.Exit(0);
     }
 
     public bool saveTime(float currTime) {
         completion_time = currTime - start_time;
         time = completion_time;
-       // Debug.Log("time completion: " + time);
+        // Debug.Log("time completion: " + time);
         updateBuilder();
 
         // Debug.Log("finished in : " + completion_time.ToString("n2") + "seconds!");
-        if (!targetHandler.incrementAngle())
-        { //new target
-            if (!targetHandler.incrementTarget())
-            { //new startpos
-                if (!targetHandler.incrementStartPos())
-                { //end life/gamee :)
+        if (!targetHandler.incrementAngle()) { //new target
+            if (!targetHandler.incrementTarget()) { //new startpos
+                if (!targetHandler.incrementStartPos()) { //end life/gamee :)
                     save();
-                } else
-                {
+                } else {
                     calculateDist();
                 }
-            }
-            else
-            {
+            } else {
                 calculateDist();
             }
         }
         hasFetched = false;
         return true;
     }
-    
+
     public bool reachedTarget { get; set; } = false;
     // Update is called once per frame
-    void Update()
-    {
+    void Update() {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPaused = true;
+#endif
         Time.timeScale = 10.0f;
         if (Time.time - start_time > 160) {
             setTime();

@@ -1308,7 +1308,7 @@ MonoBehaviour:
   turret: {fileID: 530427388, guid: 2a8e36ddf0fd44de2bd9497c29c36b67, type: 3}
   number_of_turrets: 10
   number_of_extra_cars: 0
-  random_seed: 34
+  random_seed: 6
   turret_text: {fileID: 0}
   turret_list: []
   weak_turrets: 0
@@ -2207,6 +2207,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9236be175fa7eb845b5d513766871afd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  measureNodes: 0
+  measureAngles: 0
   car: {fileID: 1056475042}
   terrain_manager_game_object: {fileID: 1358011048}
 --- !u!4 &1368019366

@@ -1,7 +1,6 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class Coordinator {
 
@@ -27,7 +26,6 @@ public class Coordinator {
     }
 
     public Vector3 get_target_position(GameObject leader, GameObject car, int index){
-
         Vector3 leader_position = leader.transform.position;
         Vector3 leader_direction = leader.transform.forward;
         Vector3 right = new Vector3(leader_direction.z, leader_direction.y, -leader_direction.x).normalized;
