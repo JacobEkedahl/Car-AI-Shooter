@@ -1,14 +1,25 @@
 ﻿
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class NodeGenerator {
     private TerrainInfo info;
-    public NodeGenerator(TerrainInfo info) {
-        this.info = info;
+    private static NodeGenerator instance = null;
+
+    public static NodeGenerator getInstance() {
+        if (instance == null) {
+            instance = new NodeGenerator();
+        }
+
+        return instance;
     }
 
-    public List<GameObject> prob1() {
+    private NodeGenerator() {
+    }
+
+    public List<GameObject> prob1(TerrainInfo info) {
+        this.info = info;
         List<GameObject> enemies = new List<GameObject>();
 
         enemies = new List<GameObject>();
@@ -34,42 +45,13 @@ public class NodeGenerator {
      *Recreate the path between the nodes and along the path remove nodes which can be seen from our total set.
      *If any nodes are remaining let the third car take these. Otherwise let the third car navigate from the middle position on the path
      */
-
+     
     List<AdjNode> nodes;
-    public List<GameObject> prob2() {
-        if (nodes == null) {
-            initAdjNodes();
-        }
+    public List<GameObject> prob2(TerrainInfo info) {
+        this.info = info;
+        List<GameObject> enemies = new List<GameObject>();
 
-        for (int i = 1; i <= 4; i++) {
-            List<GameObject> enemies = new List<GameObject>();
-            foreach (AdjNode node in nodes) {
-                if (node.getCount() == i) {
-                    enemies.Add(node.obj);
-                }
-            }
-        }
-
-        List<GameObject> result = new List<GameObject>();
-        foreach (AdjNode node in nodes) {
-            int count = node.getCount();
-            Debug.Log("count: " + count);
-            if (count < 3) {
-                result.Add(node.obj);
-            }
-
-            if (count == 2) {
-                node.obj.GetComponent<Renderer>().material.color = Color.red;
-            }
-        }
-
-        Debug.Log("size of lonely nodes: " + result.Count + ", nodes count: " + nodes.Count);
-        return result;
-    }
-
-    private void initAdjNodes() {
-        nodes = new List<AdjNode>();
-
+        enemies = new List<GameObject>();
         int width = info.x_N;
         int height = info.z_N;
         float widthSquare = (info.x_high - info.x_low) / width;
@@ -78,74 +60,30 @@ public class NodeGenerator {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 if (info.traversability[i, j] != 1) {
-                    AdjNode curr = getNode(i, j);
-                    if (curr == null) {
-                        GameObject cube = createCube(i, j, widthSquare, heightSquare);
-                        curr = new AdjNode(cube, i, j);
-                        nodes.Add(curr);
-                    }
-
-                    //add all the neighbors to this node
-                    GameObject west = GetNeighbor("West", info, i, j, widthSquare, heightSquare);
-                    GameObject north = GetNeighbor("North", info, i, j, widthSquare, heightSquare);
-                    GameObject east = GetNeighbor("East", info, i, j, widthSquare, heightSquare);
-                    GameObject south = GetNeighbor("South", info, i, j, widthSquare, heightSquare);
-
-                    curr.addNeighbor(west);
-                    curr.addNeighbor(north);
-                    curr.addNeighbor(east);
-                    curr.addNeighbor(south);
+                    enemies.Add(createCube(i, j, widthSquare, heightSquare));
                 }
             }
         }
+
+        return enemies;
     }
 
-    public AdjNode getNode(int i, int j) {
-        for (int index = 0; index < nodes.Count; index++) {
-            if (nodes[index].i == i && nodes[index].j == j) {
-                return nodes[index];
+    public List<GameObject> getPriority(List<GameObject> myNodes, Vector3 carPos) {
+        Cluster cluster = new Cluster(3, info, myNodes);
+        List<GameObject> chosenCluster = myNodes;
+        cluster.run();
+        float minDist = float.MaxValue;
+        for(int i = 0; i < cluster.cluster_means.Count; i++) {
+            float dist = Vector3.Distance(cluster.cluster_means[i], carPos);
+            if (dist < minDist) {
+                minDist = dist;
+                chosenCluster = cluster.clusters[i];
             }
         }
 
-        return null;
+        return chosenCluster;
     }
-
-    public GameObject GetNeighbor(string type, TerrainInfo info, int i, int j, float widthSquare, float heightSquare) {
-        switch (type) {
-            case "West":
-                i--;
-                break;
-            case "North":
-                j--;
-                break;
-            case "East":
-                i++;
-                break;
-            case "South":
-                j++;
-                break;
-        }
-        if (i > 0 && info.traversability[i, j] != 1) {
-            //create this neighbor if i already havent
-            bool haveCreated = false;
-            for (int index = 0; index < nodes.Count; index++) {
-                if (nodes[index].i == i && nodes[index].j == j) //yes i have
-                {
-                    return nodes[index].obj;
-                }
-            }
-
-            if (!haveCreated) {
-                GameObject cube = createCube(i, j, widthSquare, heightSquare);
-                AdjNode neighbor = new AdjNode(cube, i, j);
-                nodes.Add(neighbor);
-                return cube;
-            }
-        }
-
-        return null;
-    }
-
+    
     public GameObject createCube(int i, int j, float widthSquare, float heightSquare) {
 
         float x = info.x_low + (i * widthSquare) + (widthSquare / 2);
@@ -156,19 +94,14 @@ public class NodeGenerator {
 
         return cube;
     }
-
-    public List<GameObject> prob2(List<GameObject> remainers) {
-        //filter out the nodes which are not in remainers in our list of adjnodes
-        return null;
-    }
-
+    
     public List<GameObject> prob3() {
         List<GameObject> enemies = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
         return enemies;
     }
 
-    public List<GameObject> generateRandomObjects(int number) {
-        List<GameObject> targets = prob1();
+    public List<GameObject> generateRandomObjects(int number, TerrainInfo info) {
+        List<GameObject> targets = prob1(info);
         List<GameObject> result = new List<GameObject>();
 
         for (int i = 0; i < number; i++) {

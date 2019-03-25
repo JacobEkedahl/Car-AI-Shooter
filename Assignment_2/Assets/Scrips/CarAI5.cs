@@ -29,9 +29,6 @@ namespace UnityStandardAssets.Vehicles.Car
             friends = GameObject.FindGameObjectsWithTag("Player");
             // enemies = GameObject.FindGameObjectsWithTag("Enemy");
 
-            NodeGenerator generator = new NodeGenerator(terrain_manager.myInfo);
-            List<GameObject> enemies = generator.prob2();
-
             // Plan your path here
             // ...
         }

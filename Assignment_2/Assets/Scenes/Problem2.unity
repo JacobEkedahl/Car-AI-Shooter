@@ -5849,9 +5849,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 130498457}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9934e7b85af2a024c93f3ab196f313f7, type: 3}
+  m_Script: {fileID: 11500000, guid: bff4de0420709e64e9558380205dcbc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  problem: Prob2
+  create_node_map: 1
   terrain_manager_game_object: {fileID: 342108197}
   enemies: []
   current_car: 0
@@ -10667,7 +10669,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &172169027
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10693,12 +10695,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 172169026}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd8f88dbef86049759c7f8b36661fe22, type: 3}
+  m_Script: {fileID: 11500000, guid: b6ee369aee24f8c438110ca70a0939f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 342108197}
   cluster_manager_object: {fileID: 130498457}
-  friends: []
   enemies: []
   lineOfSight_enemies: []
 --- !u!114 &172169029
@@ -34092,7 +34093,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1193214290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34118,12 +34119,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1193214289}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0615546388c46a68ca4014cce1578b, type: 3}
+  m_Script: {fileID: 11500000, guid: b6ee369aee24f8c438110ca70a0939f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 342108197}
   cluster_manager_object: {fileID: 130498457}
-  friends: []
   enemies: []
   lineOfSight_enemies: []
 --- !u!114 &1193214292
@@ -55493,9 +55493,9 @@ MonoBehaviour:
   terrain_manager_game_object: {fileID: 342108197}
   race_car: {fileID: 3165470286205641539}
   turret: {fileID: 530427388, guid: 2a8e36ddf0fd44de2bd9497c29c36b67, type: 3}
-  number_of_turrets: 100
+  number_of_turrets: 200
   number_of_extra_cars: 0
-  random_seed: 7
+  random_seed: 8
   turret_text: {fileID: 1500313255}
   turret_list: []
   weak_turrets: 1
@@ -76761,7 +76761,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3165470286205641539}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 96468c245ae8e0d4f8f1c7a7b8b0542e, type: 3}
   m_Name: 
@@ -76822,12 +76822,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 3165470286205641539}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd8f88dbef86049759c7f8b36661fe22, type: 3}
+  m_Script: {fileID: 11500000, guid: b6ee369aee24f8c438110ca70a0939f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   terrain_manager_game_object: {fileID: 342108197}
   cluster_manager_object: {fileID: 130498457}
-  friends: []
   enemies: []
   lineOfSight_enemies: []
 --- !u!114 &3165470286205641659

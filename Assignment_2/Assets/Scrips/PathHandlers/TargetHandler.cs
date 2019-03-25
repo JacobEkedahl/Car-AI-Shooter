@@ -28,49 +28,49 @@ public class TargetHandler : MonoBehaviour {
     void Start() {
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
         GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
-        NodeGenerator generator = new NodeGenerator(terrain_manager.myInfo);
-
-        //expecting that each player is starting close to eachother, will use this to determine startnode
-        List<GameObject> players = new List<GameObject>(GameObject.FindGameObjectsWithTag("Player"));
+        NodeGenerator generator = NodeGenerator.getInstance();
+        vrpClusters = new List<List<GameObject>>();
+        no_clusters = GameObject.FindGameObjectsWithTag("Player").Length;
 
         switch (problem) {
             case "Prob1":
-                enemies = generator.prob1();
+                enemies = generator.prob1(terrain_manager.myInfo);
                 break;
             case "Prob2":
-                enemies = generator.prob2();
+                Debug.Log("problem 2");
+                enemies = generator.prob2(terrain_manager.myInfo);
                 break;
             case "Prob3":
                 enemies = generator.prob3();
                 astar = new AStar(grid, true);
+
+                //has fetch the enemies for this problem now need to cluster these enemies
+                //first we have to log the distance and angles between all the nodes in each cluster.
+                if (create_node_map) {
+                    DataGenerator.generate(grid, enemies, problem + "/", true);
+                }
+
+                //now we have generated and saved our nodesmap, clustering should be based on astar distance
+                List<GameObject> route = GAConnector.getPath(enemies, problem + "/");
+                dividePath(route, no_clusters);
+                has_clustered = true;
                 break;
             default:
-                return;
+                break;
         }
 
-        //has fetch the enemies for this problem now need to cluster these enemies
-        //first we have to log the distance and angles between all the nodes in each cluster.
-
-        if (create_node_map) {
-            DataGenerator.generate(grid, enemies, problem + "/", true);
-        }
-
-        //now we have generated and saved our nodesmap, clustering should be based on astar distance
-        no_clusters = GameObject.FindGameObjectsWithTag("Player").Length;
         no_enemies = enemies.Count;
-
-        List<GameObject> route = GAConnector.getPath(enemies, problem + "/");
-        dividePath(route, no_clusters);
     }
 
-    private void generateAstarPath(List<GameObject> cluster) {
-        List<List<Vector3>> path = new List<List<Vector3>>();
-
-
+    private void generateCluster() {
+        Debug.Log("enemies count: " + enemies.Count);
+        Cluster cluster = new Cluster(no_clusters, terrain_manager, enemies);
+        cluster.run();
+        List<Vector3> means = cluster.cluster_means;
+        this.vrpClusters = cluster.clusters;
     }
 
     private void dividePath(List<GameObject> route, int no_clusters) {
-        vrpClusters = new List<List<GameObject>>();
         int chunk = route.Count / no_clusters;
         int startIndex = 0;
 
@@ -155,6 +155,11 @@ public class TargetHandler : MonoBehaviour {
         }
 
         if (no_clusters != 0 && no_enemies != 0 && !has_clustered) {
+            //do clustering
+
+            generateCluster();
+
+            //end clustering
             has_clustered = true;
         }
     }

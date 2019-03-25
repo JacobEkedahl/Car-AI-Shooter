@@ -7,24 +7,33 @@ public class Cluster {
     public List<Vector3> cluster_means;
     private TerrainManager terrain_manager;
     private List<GameObject> enemies;
-
-    private AStar aStar;
     public int k;
 
     public Cluster(int k, TerrainManager terrain_manager, List<GameObject> enemies) {
-        Debug.Log("in cluster: " + enemies.Count);
         this.k = k;
         this.terrain_manager = terrain_manager;
         this.clusters = new List<List<GameObject>>();
         this.cluster_means = new List<Vector3>();
         this.enemies = enemies;
-        GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
-        // aStar = new AStar(grid); //astar loads this grid into a internal voronoigrid
 
         for (int i = 0; i < k; i++) {
             clusters.Add(new List<GameObject>());
             float random_x = UnityEngine.Random.Range(terrain_manager.myInfo.x_low, terrain_manager.myInfo.x_high);
             float random_z = UnityEngine.Random.Range(terrain_manager.myInfo.z_low, terrain_manager.myInfo.z_high);
+            cluster_means.Add(new Vector3(random_x, 0, random_z));
+        }
+    }
+
+    public Cluster(int k, TerrainInfo info, List<GameObject> enemies) {
+        this.k = k;
+        this.clusters = new List<List<GameObject>>();
+        this.cluster_means = new List<Vector3>();
+        this.enemies = enemies;
+
+        for (int i = 0; i < k; i++) {
+            clusters.Add(new List<GameObject>());
+            float random_x = UnityEngine.Random.Range(info.x_low, info.x_high);
+            float random_z = UnityEngine.Random.Range(info.z_low, info.z_high);
             cluster_means.Add(new Vector3(random_x, 0, random_z));
         }
     }
@@ -35,6 +44,7 @@ public class Cluster {
         int count = 0;
         do {
             diff = 0;
+            clear_clusters();
             List<Vector3> old_cluster_means = new List<Vector3>(cluster_means);
             update_clusters();
             for (int i = 0; i < k; i++) {
@@ -48,18 +58,18 @@ public class Cluster {
         } while (diff > 1);
     }
 
+    private void clear_clusters() {
+        for (int i = 0; i < clusters.Count; i++) {
+            clusters[i].Clear();
+        }
+    }
+
     public void update_clusters() {
         for (int i = 0; i < enemies.Count; i++) {
             int cluster_id = 0;
             float shortest_distance = float.MaxValue;
             for (int j = 0; j < k; j++) {
-                //aStar.initAstar(cluster_means[j], enemies[i].transform.position);
-                //float distance = aStar.dist_astar();
-                Vector3 enemy_pos = enemies[i].transform.position;
-                float distance = Vector3.Distance(enemy_pos, cluster_means[j]);
-                RaycastHit hit;
-                bool hits_wall = Physics.Raycast(cluster_means[j], enemy_pos - cluster_means[j], out hit, Vector3.Distance(cluster_means[j], enemy_pos));
-                if (hits_wall) distance *= 2;
+                float distance = Vector3.Distance(enemies[i].transform.position, cluster_means[j]);
                 if (distance < shortest_distance) {
                     shortest_distance = distance;
                     cluster_id = j;

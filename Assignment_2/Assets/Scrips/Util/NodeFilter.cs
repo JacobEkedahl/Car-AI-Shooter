@@ -1,45 +1,77 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public class NodeFilter {
-    public static List<AdjNode> filter(List<AdjNode> nodes, int count, int width, int height) {
-        List<AdjNode> newTargets = new List<AdjNode>();
-        //find the node that can see the most nodes of this count
+    public static List<GameObject> filterBasedOnCount(List<AdjNode> nodes) {
+        List<GameObject> result = new List<GameObject>();
 
-        //go up, down, left, and right and count and if there is no node with those indexes stop that direction
-        foreach (AdjNode node in nodes) {
-            //look right
-            for (int i = node.i + 1; i < width; i++) {
-                AdjNode visibleNode = findNode(i, node.j, nodes);
-                if (visibleNode == null) {
-                    break;
-                } else {
-                    node.addVisibleNode(visibleNode);
-                }
-            }
+        List<AdjNode> chosenTargets = new List<AdjNode>();
+        //We have a set I, starting from empty
+        
+        //Load the targets from nodes, should do for count 0, 1, 2... until all targets have been covered
+        for (int i = 0; i <= 2; i++) {
 
-            //look left
-            for (int i = node.i - 1; i >= 0; i--) {
-                AdjNode visibleNode = findNode(i, node.j, nodes);
-                if (visibleNode == null) {
-                    break;
-                } else {
-                    node.addVisibleNode(visibleNode);
+            List<AdjNode> I = new List<AdjNode>();
+            //Find the targets, prioritize targets with low count
+            List<AdjNode> enemies = new List<AdjNode>(nodes.Where(w => !w.hasBeenCovered && w.getCount() == i));
+            
+            while (!isEqual(I, enemies)) {
+                int biggestDifference = int.MinValue;
+                AdjNode chosenTarget = null;
+                foreach (AdjNode target in nodes) {
+                    HashSet<AdjNode> tmp = new HashSet<AdjNode>(I);
+                    int sizeBefore = tmp.Count;
+
+                    tmp.UnionWith(target.visibleNodes.Where(w => w.getCount() == i && !w.hasBeenCovered));
+                    int sizeAfter = tmp.Count;
+                    int difference = sizeAfter - sizeBefore;
+
+                    if (difference > biggestDifference) {
+                        biggestDifference = difference;
+                        chosenTarget = target;
+                    }
                 }
+
+                Debug.Log("biggestDiff: " + biggestDifference);
+
+                chosenTargets.Add(chosenTarget);
+                I.AddRange(chosenTarget.visibleNodes.Where(w => w.getCount() == i));
+                markAsTaken(chosenTarget);
+
             }
         }
-
-
-        return newTargets;
+        return convert(chosenTargets);
     }
 
-    private static AdjNode findNode(int i, int j, List<AdjNode> nodes) {
-        foreach (AdjNode node in nodes) {
-            if (node.i == i && node.j == j) {
-                return node;
-            }
+    private static void markAsTaken(AdjNode node) {
+        foreach (AdjNode visibleNodes in node.visibleNodes) {
+            visibleNodes.hasBeenCovered = true;
         }
 
-        return null;
+        node.hasBeenCovered = true;
     }
 
+    public static List<GameObject> convert(List<AdjNode> nodes) {
+        List<GameObject> result = new List<GameObject>();
+
+        foreach (AdjNode node in nodes) {
+            node.obj.GetComponent<Renderer>().material.color = Color.green;
+            result.Add(node.obj);
+        }
+
+        return result;
+    }
+
+    private static bool isEqual<T>(List<T> targets, List<T> enemies) {
+        HashSet<T> tmpTargets = new HashSet<T>(targets);
+        HashSet<T> tmpEnemies = new HashSet<T>(enemies);
+        if (tmpTargets.Count != tmpEnemies.Count) {
+            Debug.Log("not equal: " + tmpTargets.Count + ":" + tmpEnemies.Count);
+            return false;
+        }
+
+        Debug.Log("equal: " + tmpTargets.Count + ":" + tmpEnemies.Count);
+        return true;
+    }
 }

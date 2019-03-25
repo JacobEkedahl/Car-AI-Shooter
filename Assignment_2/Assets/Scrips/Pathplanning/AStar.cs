@@ -106,7 +106,7 @@ public class AStar {
 
         for (int i = 0; i < path.Count - 1; i++) {
             result += Vector3.Distance(path[i], path[i + 1]);
-            Debug.DrawLine(path[i], path[i + 1], Color.white, 50);
+         //   Debug.DrawLine(path[i], path[i + 1], Color.white, 50);
         }
 
         return result;
@@ -151,7 +151,7 @@ public class AStar {
                 to = furthest;
                 distance = Vector3.Distance(from, to);
                 result.Add(from);
-                Debug.DrawLine(from, to, Color.blue, 50);
+             //   Debug.DrawLine(from, to, Color.blue, 50);
                 fracJourney = 0.0f;
             }
             fracJourney += (2 / distance);
@@ -162,7 +162,7 @@ public class AStar {
     }
 
     private bool canSee(Vector3 from, Vector3 to) {
-        Debug.DrawLine(from, to, Color.blue);
+       // Debug.DrawLine(from, to, Color.blue);
         float dist = Vector3.Distance(from, to);
         float currPos = 0;
         float fracJourney = 0;
@@ -205,7 +205,7 @@ public class AStar {
 
     private float getAngle(Vector3 from, Vector3 to, Vector3 dir) {
         Vector3 targetDir = to - from;
-        Debug.DrawLine(from, to, Color.red, 80);
+       // Debug.DrawLine(from, to, Color.red, 80);
         return Vector3.SignedAngle(targetDir, dir, Vector3.down);
     }
 

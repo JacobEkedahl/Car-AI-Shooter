@@ -27,8 +27,9 @@ public class CarManager : MonoBehaviour {
     void Start() {
         terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
         GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
-        NodeGenerator generator = new NodeGenerator(terrain_manager.myInfo);
-        List<GameObject> targets = generator.generateRandomObjects(noRandomNodes);
+        NodeGenerator generator = NodeGenerator.getInstance();
+
+        List<GameObject> targets = generator.generateRandomObjects(noRandomNodes, terrain_manager.myInfo);
         targetHandler = new TargetHandler_GenData(targets);
 
         if (!measureAngles) {

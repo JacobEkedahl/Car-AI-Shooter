@@ -7,8 +7,10 @@ public class AdjNode {
     public GameObject obj { get; set; }
     public int i { get; set; }
     public int j { get; set; }
+    public bool hasBeenCovered { get; set; }
 
     public AdjNode(GameObject me, int i, int j) {
+        hasBeenCovered = false;
         visibleNodes = new List<AdjNode>();
         neighbors = new List<GameObject>();
         this.obj = me;
@@ -33,6 +35,18 @@ public class AdjNode {
         }
 
         return result;
+    }
+
+    public override bool Equals(System.Object obj) {
+        if (obj == null)
+            return false;
+
+        AdjNode other = (AdjNode)obj;
+        if (this.i == other.i && this.j == other.j) {
+            return true;
+        }
+
+        return false;
     }
 
 
