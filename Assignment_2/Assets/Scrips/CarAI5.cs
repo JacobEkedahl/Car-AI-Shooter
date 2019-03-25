@@ -24,7 +24,7 @@ namespace UnityStandardAssets.Vehicles.Car {
             int my_index = index_assigner.get_my_index();
             Coordinator coordinator = new Coordinator();
 
-            car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, terrain_manager, this.transform, 100, false, 100, false, target_handler, terrain_manager.myInfo);
+            car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
         }
 
 

@@ -10,11 +10,11 @@ public class LeaderCar : MainCar {
     public List<Vector3> nodesToGoal { get; set; } = new List<Vector3>();
     public EnemyPlanner enemy_planner { get; set; }
 
-    public LeaderCar(Coordinator coordinator, CarIndexAssign index_assigner, int my_index, CarController m_Car, TerrainManager terrain_manager, Transform car, int timer, bool go_forward, int coll_timer, bool go_back, TargetHandler target_handler, TerrainInfo info) : base(coordinator, index_assigner, my_index, m_Car, terrain_manager, car, timer, go_forward, coll_timer, go_back, target_handler, info) {
+    public LeaderCar(Coordinator coordinator, CarIndexAssign index_assigner, int my_index, CarController m_Car, Transform car, TargetHandler target_handler, TerrainInfo info) : base(coordinator, index_assigner, my_index, m_Car, car, target_handler, info) {
         enemies = new List<GameObject>();
         nodesToGoal = new List<Vector3>();
         enemy_planner = new EnemyPlanner();
-        GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
+        GridDiscretization grid = new GridDiscretization(info, 1, 1, 4);
         astar = new AStar(grid, true); //astar loads this grid into a internal voronoigrid, the targets are turrets
     }
 

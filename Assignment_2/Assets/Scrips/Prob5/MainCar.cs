@@ -5,17 +5,12 @@ using UnityEngine;
 using UnityStandardAssets.Vehicles.Car;
 
 public abstract class MainCar {
-    public MainCar(Coordinator coordinator, CarIndexAssign index_assigner, int my_index, CarController m_Car, TerrainManager terrain_manager, Transform car, int timer, bool go_forward, int coll_timer, bool go_back, TargetHandler target_handler, TerrainInfo info) {
+    public MainCar(Coordinator coordinator, CarIndexAssign index_assigner, int my_index, CarController m_Car, Transform car, TargetHandler target_handler, TerrainInfo info) {
         this.coordinator = coordinator;
         this.index_assigner = index_assigner;
         this.my_index = my_index;
         this.m_Car = m_Car;
-        this.terrain_manager = terrain_manager;
         this.car = car;
-        this.timer = timer;
-        this.go_forward = go_forward;
-        this.coll_timer = coll_timer;
-        this.go_back = go_back;
         this.target_handler = target_handler;
         this.info = info;
     }
