@@ -57,6 +57,7 @@ public class TargetHandler : MonoBehaviour {
                 has_clustered = true;
                 break;
             case "Prob5":
+                no_clusters = 1;
                 enemies = generator.prob3();
                 astar = new AStar(grid, true);
 
@@ -154,7 +155,7 @@ public class TargetHandler : MonoBehaviour {
 
     public int current_car = 0;
     public List<GameObject> getCluster() {
-        return this.vrpClusters[current_car++ % no_clusters];
+         return this.vrpClusters[current_car++ % no_clusters];
     }
 
     public bool has_clustered { get; set; } = false;
