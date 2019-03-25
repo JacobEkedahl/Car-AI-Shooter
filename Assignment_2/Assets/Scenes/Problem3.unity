@@ -53661,7 +53661,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   problem: Prob3
-  create_node_map: 1
+  create_node_map: 0
   terrain_manager_game_object: {fileID: 1966902054}
   enemies: []
   current_car: 0

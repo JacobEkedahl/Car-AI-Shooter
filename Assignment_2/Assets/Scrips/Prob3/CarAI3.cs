@@ -62,40 +62,33 @@ namespace UnityStandardAssets.Vehicles.Car {
         }
 
         private void FixedUpdate() {
-            //Time.timeScale = 10.0f;
-            if (loadTime > 0) { //waiting for car to settle after landing from sky
-                loadTime--;
-                go_back_routine(1.0f);
-            } else {
-                fetch_clusters();
+            fetch_clusters();
 
-                if (has_fetched) {
+            if (has_fetched) {
 
-                    runAstar();
+                runAstar();
 
 
-                    List<float> car_input = get_car_input();
-                    if (car_input == null) {
-                        return;
-                    }
+                List<float> car_input = get_car_input();
+                if (car_input == null) {
+                    return;
+                }
 
-                    float steering = car_input[0];
-                    float acceleration = car_input[1];
+                float steering = car_input[0];
+                float acceleration = car_input[1];
 
-                    if (current_target == null) {
-                        replan();
-                    }
+                if (current_target == null) {
+                    replan();
+                }
 
-                    if (go_back) {
-                        go_back_routine(-1.0f);
-                    } else if (go_forward) {
-                        go_back_routine(1.0f);
-                    } else {
-                        m_Car.Move(steering, acceleration, acceleration, 0f);
-                    }
+                if (go_back) {
+                    go_back_routine(-1.0f);
+                } else if (go_forward) {
+                    go_back_routine(1.0f);
+                } else {
+                    m_Car.Move(steering, acceleration, acceleration, 0f);
                 }
             }
-
         }
 
 
