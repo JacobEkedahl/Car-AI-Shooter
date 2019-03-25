@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace UnityStandardAssets.Vehicles.Car {
@@ -15,11 +16,11 @@ namespace UnityStandardAssets.Vehicles.Car {
 
         public List<GameObject> enemies;
         public List<GameObject> lineOfSight_enemies = new List<GameObject>();
+        NodeGenerator nodeGenerator;
 
         private List<Vector3> nodesToGoal = new List<Vector3>();
         private int currIndex = -1; //which node to target
         private AStar astar;
-        private VRPsolver vrp;
         private int loadTime = 100;
 
         private void Start() {
@@ -27,22 +28,23 @@ namespace UnityStandardAssets.Vehicles.Car {
             target_handler = cluster_manager_object.GetComponent<TargetHandler>();
             //Debug.Log("value from targethandler: " + target_handler.no_clusters + ", enemies: " + target_handler.no_enemies);
 
-
             // get the car controller
             m_Car = GetComponent<CarController>();
             terrain_manager = terrain_manager_game_object.GetComponent<TerrainManager>();
+
+            nodeGenerator = NodeGenerator.getInstance();
             enemy_planner = new EnemyPlanner();
 
             //retrieve the list of nodes from my position to next pos
             GridDiscretization grid = new GridDiscretization(terrain_manager.myInfo, 1, 1, 4);
-            astar = new AStar(grid, true); //astar loads this grid into a internal voronoigrid, the targets are turrets
+            astar = new AStar(grid, false); //astar loads this grid into a internal voronoigrid, the targets are boxes
         }
 
         private void remove_close_box() {
             foreach (GameObject box in enemies) {
                 if (box == null)
                     continue;
-                if (Vector3.Distance(transform.position, box.transform.position) <= 3.0f) {
+                if (Vector3.Distance(this.transform.position, box.transform.position) < 10.0f) { 
                     Destroy(box);
                 }
             }
@@ -57,6 +59,7 @@ namespace UnityStandardAssets.Vehicles.Car {
             //fetch clusters if not has fetched
             if (!has_fetched) {
                 enemies = target_handler.getCluster();
+                Debug.Log("enemies in car: " + enemies.Count);
                 has_fetched = true;
             }
         }
@@ -158,47 +161,13 @@ namespace UnityStandardAssets.Vehicles.Car {
 
         private bool can_update = true;
         private GameObject current_target;
-
-        private GameObject get_next_target() {
-            List<GameObject> possibleTargets = new List<GameObject>();
-            GameObject next_target;
-
-            for (int i = 0; i < enemies.Count; i++) {
-                if (!(enemies[i] == null)) {
-                    possibleTargets.Add(enemies[i]);
-                }
-            }
-
-            float minDistance = float.MaxValue;
-            if (possibleTargets.Count == 2) {
-                astar.initAstar(this.transform.position, possibleTargets[0].transform.position);
-                List<Vector3> path = astar.getPath();
-                path = astar.reconstructPath(path);
-                float dist_target_one = astar.dist_astar(path);
-
-                astar.initAstar(this.transform.position, possibleTargets[1].transform.position);
-                List<Vector3> path2 = astar.getPath();
-                path2 = astar.reconstructPath(path2);
-                float dist_target_two = astar.dist_astar(path2);
-
-                if (dist_target_one < dist_target_two) {
-                    return possibleTargets[0];
-                } else {
-                    return possibleTargets[1];
-                }
-
-            } else if (possibleTargets.Count != 0) {
-                return possibleTargets[0];
-            }
-
-            return null;
-        }
-
         private void updatePath() {
             load_lineOfSight();
-            current_target = get_next_target();
-            if (current_target == null) {
-                current_target = this.gameObject;
+
+            if (lineOfSight_enemies.Count > 0) {
+                current_target = enemy_planner.get_closest_object(lineOfSight_enemies, transform.position);
+            } else {
+                current_target = enemy_planner.get_closest_object(enemies, transform.position);
             }
 
             astar.initAstar(transform.position, current_target.transform.position);
@@ -238,6 +207,7 @@ namespace UnityStandardAssets.Vehicles.Car {
 
         private int timer = 100;
         private void OnDrawGizmos() {
+            /*
             if (Application.isPlaying) {
                 if (nodesToGoal.Count > 0) {
                     Gizmos.color = Color.yellow;
@@ -262,7 +232,7 @@ namespace UnityStandardAssets.Vehicles.Car {
                     to.y += 1;
                     Gizmos.DrawLine(from, to);
                 }
-            }
+            }*/
         }
 
         private void OnCollisionExit(Collision other) {
@@ -310,11 +280,11 @@ namespace UnityStandardAssets.Vehicles.Car {
             }
         }
 
+
         private bool car_can_see() {
             Vector3 offset = transform.right;
-            Vector3 offset_backward = -transform.forward * 3;
-            Vector3 offset_forward = transform.forward * 3;
-
+            Vector3 offset_backward = -transform.forward * 2;
+            Vector3 offset_forward = transform.forward * 2;
 
             offset *= 2;
             Vector3 right_pos_forward = transform.position + offset_forward + offset;
@@ -322,9 +292,15 @@ namespace UnityStandardAssets.Vehicles.Car {
             Vector3 right_pos_backward = transform.position + offset_backward + offset;
             Vector3 left_pos_backward = transform.position + offset_backward + -offset;
 
+
             for (int i = nodesToGoal.Count - 1; i >= 0; i--) {
-                if (can_see(left_pos_forward, nodesToGoal[i]) && can_see(right_pos_forward, nodesToGoal[i]) &&
-                    can_see(left_pos_backward, nodesToGoal[i]) && can_see(right_pos_backward, nodesToGoal[i])) {
+                Vector3 left_other = nodesToGoal[i] + offset;
+                Vector3 right_other = nodesToGoal[i] - offset;
+
+                if (can_see(left_pos_forward, left_other) && can_see(right_pos_forward, left_other) &&
+                    can_see(left_pos_backward, left_other) && can_see(right_pos_backward, left_other) &&
+                    can_see(left_pos_forward, right_other) && can_see(right_pos_forward, right_other) &&
+                    can_see(left_pos_backward, right_other) && can_see(right_pos_backward, right_other)) {
                     currIndex = i;
                     return true;
                 }
@@ -344,16 +320,9 @@ namespace UnityStandardAssets.Vehicles.Car {
 
         private void load_lineOfSight() {
             lineOfSight_enemies.Clear();
-
-            foreach (GameObject enemy in enemies) {
-                if (enemy == null) {
-                    continue;
-                }
-
-                if (can_see(transform.position, enemy.transform.position)) {
-                    lineOfSight_enemies.Add(enemy);
-                }
-            }
+            enemies = new List<GameObject>(enemies.Where(e => e != null));
+            lineOfSight_enemies = nodeGenerator.getPriority(enemies, transform.position);
+            Debug.Log("line of sight: " + lineOfSight_enemies.Count);
         }
     }
 }

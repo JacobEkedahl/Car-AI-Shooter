@@ -34,6 +34,7 @@ public class TargetHandler : MonoBehaviour {
 
         switch (problem) {
             case "Prob1":
+                Debug.Log("problem 1");
                 enemies = generator.prob1(terrain_manager.myInfo);
                 break;
             case "Prob2":
