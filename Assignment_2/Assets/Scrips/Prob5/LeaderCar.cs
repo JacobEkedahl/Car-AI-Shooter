@@ -195,7 +195,7 @@ public class LeaderCar : MainCar {
 
         int layer_mask = LayerMask.GetMask("CubeWalls");
         if (!Physics.Linecast(from, other_pos, layer_mask)) {
-            Debug.DrawLine(from, other_pos, Color.green, 0.1f);
+            //Debug.DrawLine(from, other_pos, Color.green, 0.1f);
             return true;
         }
         return false;
@@ -226,7 +226,7 @@ public class LeaderCar : MainCar {
         astar.initAstar(car.position, current_target.transform.position);
         currIndex = 0;
 
-        Debug.DrawLine(current_target.transform.position, car.position, Color.blue, 100);
+        //Debug.DrawLine(current_target.transform.position, car.position, Color.blue, 100);
         can_update = false;
     }
 

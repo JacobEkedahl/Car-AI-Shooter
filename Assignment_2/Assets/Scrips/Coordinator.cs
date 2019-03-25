@@ -9,9 +9,11 @@ public class Coordinator {
     List<float> left_offsets;
     List<float> backward_offsets;
 
-    float width = 45;
-    float length = 55;
-    public Coordinator(){
+    float width;
+    float length;
+    public Coordinator(float width, float length){
+        this.width = width;
+        this.length = length;
         left_offsets = new List<float>();
         backward_offsets = new List<float>();
         left_offsets.Add(width);

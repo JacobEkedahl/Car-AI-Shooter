@@ -13,7 +13,7 @@ namespace UnityStandardAssets.Vehicles.Car {
         public GameObject[] enemies;
         public int my_index;
         
-        LeaderCar car;
+        MainCar car;
 
         private void Start() {
             //Cluster manager, car ask for manager for which targets to find
@@ -30,13 +30,13 @@ namespace UnityStandardAssets.Vehicles.Car {
             //for followers
             CarIndexAssign index_assigner = index_assign_object.GetComponent<CarIndexAssign>();
             my_index = index_assigner.get_my_index();
-            Coordinator coordinator = new Coordinator();
+            Coordinator coordinator = new Coordinator(5, 5);
 
-            //if(is_leader()){
-            car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
-            //} else {
-                //car = new FollowerCar(coordinator, index_assigner, my_index, m_Car, terrain_manager, this.transform, 100, false, 100, false, target_handler, terrain_manager.myInfo);
-            //}
+            if(is_leader()){
+                car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
+            } else {
+                car = new FollowerCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
+            }
         }
 
         private bool is_leader(){

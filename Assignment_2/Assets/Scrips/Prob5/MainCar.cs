@@ -28,7 +28,7 @@ public abstract class MainCar {
     public bool go_forward { get; set; } = false;
     public int coll_timer { get; set; } = 100;
     public bool go_back { get; set; } = false;
-    
+    public bool collision_handling {get; set;}
     //leadercar
     public TargetHandler target_handler { get; set; }
     public TerrainInfo info { get; set; }
@@ -38,15 +38,18 @@ public abstract class MainCar {
 
     //used for car to know if it should go back or not
     protected bool normalRun() {
-        if (go_back) {
-            go_back_routine(-1.0f);
-        } else if (go_forward) {
-            go_back_routine(1.0f);
-        } else {
-            return true;
-        }
+        if (collision_handling) {
+            if (go_back) {
+                go_back_routine(-1.0f);
+            } else if (go_forward) {
+                go_back_routine(1.0f);
+            } else {
+                return true;
+            }
 
-        return false;
+            return false;
+        }
+        return true;
     }
 
     //generic methods for all cars
@@ -94,7 +97,9 @@ public abstract class MainCar {
     private void go_back_routine(float dir) {
         if (timer > 0) {
             timer--;
-            m_Car.Move(0.0f, dir, dir, 0.0f);
+            if(m_Car != null){
+                m_Car.Move(0.0f, dir, dir, 0.0f);
+            }
         } else {
             timer = 100;
             go_back = false;

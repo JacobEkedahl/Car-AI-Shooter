@@ -8,6 +8,7 @@ public class FollowerCar : MainCar {
 
     public FollowerCar(Coordinator coordinator, CarIndexAssign index_assigner, int my_index, CarController m_Car, Transform car, TargetHandler target_handler, TerrainInfo info) : base(coordinator, index_assigner, my_index, m_Car, car, target_handler, info) {
         friends = GameObject.FindGameObjectsWithTag("Player");
+        collision_handling = false;
     }
 
     public override void go() {
