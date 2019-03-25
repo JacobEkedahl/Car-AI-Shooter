@@ -55493,9 +55493,9 @@ MonoBehaviour:
   terrain_manager_game_object: {fileID: 342108197}
   race_car: {fileID: 3165470286205641539}
   turret: {fileID: 530427388, guid: 2a8e36ddf0fd44de2bd9497c29c36b67, type: 3}
-  number_of_turrets: 200
+  number_of_turrets: 100
   number_of_extra_cars: 0
-  random_seed: 8
+  random_seed: 13
   turret_text: {fileID: 1500313255}
   turret_list: []
   weak_turrets: 1
