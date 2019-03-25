@@ -56,6 +56,20 @@ public class TargetHandler : MonoBehaviour {
                 dividePath(route, no_clusters);
                 has_clustered = true;
                 break;
+            case "Prob5":
+                enemies = generator.prob3();
+                astar = new AStar(grid, true);
+
+                //has fetch the enemies for this problem now need to cluster these enemies
+                //first we have to log the distance and angles between all the nodes in each cluster.
+                if (create_node_map) {
+                    DataGenerator.generate(grid, enemies, problem + "/", true);
+                }
+
+                //now we have generated and saved our nodesmap, clustering should be based on astar distance
+                vrpClusters.Add(GAConnector.getPath(enemies, problem + "/"));
+                has_clustered = true;
+                break;
             default:
                 break;
         }

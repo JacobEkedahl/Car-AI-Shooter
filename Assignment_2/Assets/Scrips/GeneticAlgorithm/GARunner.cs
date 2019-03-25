@@ -74,8 +74,8 @@ public class GARunner {
             }
 
             //if you include this you also have to include the same commented out lines in tspfitness
-            //   var firstCity = cities[(int)genes[0].Value];
-            //  path.Add(firstCity);
+               var firstCity = cities[(int)genes[0].Value];
+              path.Add(firstCity);
         }
 
         return path;

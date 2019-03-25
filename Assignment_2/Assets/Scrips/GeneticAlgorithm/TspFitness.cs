@@ -45,7 +45,7 @@ public class TspFitness : IFitness {
             nextStartAngle = map.getEndAngle(Cities[currentCityIndex].Position, Cities[lastCityIndex].Position);
         }
 
-        //  distanceSum += CalcDistanceTwoNodes(nextStartAngle, Cities[citiesIndexes.Last()], Cities[citiesIndexes.First()]);
+        distanceSum += CalcDistanceTwoNodes(nextStartAngle, Cities[citiesIndexes.Last()], Cities[citiesIndexes.First()]);
         var fitness = 1.0 - (distanceSum / (Cities.Count * 1000.0));
 
         ((TspChromosome)chromosome).Distance = distanceSum;
