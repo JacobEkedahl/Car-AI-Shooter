@@ -6,15 +6,15 @@ public class FollowerCar : MainCar {
 
     public GameObject[] friends;
 
-    public FollowerCar(Coordinator coordinator, CarIndexAssign index_assigner, int my_index, CarController m_Car, Transform car, TargetHandler target_handler, TerrainInfo info) : base(coordinator, index_assigner, my_index, m_Car, car, target_handler, info) {
+    public FollowerCar(Coordinator coordinator, CarController m_Car, Transform car, TargetHandler target_handler, TerrainInfo info) : base(coordinator, m_Car, car, target_handler, info) {
         friends = GameObject.FindGameObjectsWithTag("Player");
         collision_handling = false;
     }
 
     public override void go() {
-        Vector3 target_position = coordinator.get_target_position(friends[0], car.gameObject, my_index);
+        Vector3 target_position = coordinator.get_target_position(friends[get_leader()], car.gameObject, my_index);
 
-        List<float> car_input = get_car_input(target_position, friends[0]);
+        List<float> car_input = get_car_input(target_position, friends[get_leader()]);
         float steering = car_input[0];
         float acceleration = car_input[1];
         float breaking = car_input[2];
@@ -64,13 +64,23 @@ public class FollowerCar : MainCar {
             acceleration -= 1f;
         }
 
-        if (m_Car.CurrentSpeed > 66) acceleration = 0;
-        if (m_Car.CurrentSpeed > 40 && Vector3.Distance(target, car.position) < 14) acceleration = 0;
+        CarController leader = friends[get_leader()].GetComponent<CarController>();
+
+        if (m_Car.CurrentSpeed > 25) acceleration = 0;
+        if (m_Car.CurrentSpeed > leader.CurrentSpeed && Vector3.Distance(target, car.position) < 10) acceleration = 0;
 
         car_input.Add(steering);
         car_input.Add(acceleration);
         car_input.Add(breaking);
 
         return car_input;
+    }
+    private int get_leader() {
+        for (int i = 0; i < friends.Length; i++) {
+            if (friends[i] != null) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

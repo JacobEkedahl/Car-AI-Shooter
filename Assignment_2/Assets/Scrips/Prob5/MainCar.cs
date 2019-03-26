@@ -5,10 +5,8 @@ using UnityEngine;
 using UnityStandardAssets.Vehicles.Car;
 
 public abstract class MainCar {
-    public MainCar(Coordinator coordinator, CarIndexAssign index_assigner, int my_index, CarController m_Car, Transform car, TargetHandler target_handler, TerrainInfo info) {
+    public MainCar(Coordinator coordinator, CarController m_Car, Transform car, TargetHandler target_handler, TerrainInfo info) {
         this.coordinator = coordinator;
-        this.index_assigner = index_assigner;
-        this.my_index = my_index;
         this.m_Car = m_Car;
         this.car = car;
         this.target_handler = target_handler;
@@ -17,8 +15,6 @@ public abstract class MainCar {
 
     //needed for follower car
     public Coordinator coordinator { get; set; }
-    public CarIndexAssign index_assigner { get; set; }
-    public int my_index { get; set; }
 
     //generell
     public CarController m_Car { get; set; }

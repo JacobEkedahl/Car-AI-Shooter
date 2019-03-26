@@ -12,14 +12,16 @@ public class LeaderCar : MainCar {
     public List<GameObject> enemies { get; set; }
     public List<Vector3> nodesToGoal { get; set; } = new List<Vector3>();
     public EnemyPlanner enemy_planner { get; set; }
+    List<GameObject> turrets;
 
-    public LeaderCar(Coordinator coordinator, CarIndexAssign index_assigner, int my_index, CarController m_Car, Transform car, TargetHandler target_handler, TerrainInfo info) : base(coordinator, index_assigner, my_index, m_Car, car, target_handler, info) {
+    public LeaderCar(Coordinator coordinator, CarController m_Car, Transform car, TargetHandler target_handler, TerrainInfo info) : base(coordinator, m_Car, car, target_handler, info) {
         enemies = new List<GameObject>();
         nodesToGoal = new List<Vector3>();
         enemy_planner = new EnemyPlanner();
         GridDiscretization grid = new GridDiscretization(info, 1, 1, 4);
         astar = new AStar(grid, true); //astar loads this grid into a internal voronoigrid, the targets are turrets
         this.car = car;
+        turrets = new List<GameObject>(GameObject.FindGameObjectsWithTag("Enemy"));
     }
 
     public override void go() {
@@ -45,8 +47,8 @@ public class LeaderCar : MainCar {
 
             if (normalRun()) {
                 m_Car.Move(steering, acceleration, acceleration, 0f);
-                if(peek(car, 10)){
-                    Debug.Log("Positive peek!");
+                if(peek(car, 0)){
+                    //Debug.Log("Positive peek!");
                     if(m_Car.CurrentSpeed > 6){
                         acceleration = 0f;
                         breaking = 1f;
@@ -59,11 +61,11 @@ public class LeaderCar : MainCar {
     private bool peek(Transform car, float peek_distance){
         Vector3 look_ahead = car.position + car.forward * peek_distance;
 
-        for(int i = 0; i < enemies.Count; i++){
+        for(int i = 0; i < turrets.Count; i++){
             int layerMask = LayerMask.GetMask("CubeWalls");
-            if (enemies[i] == null) continue;
-            if (!Physics.Linecast(look_ahead, enemies[i].transform.position, layerMask)) {
-                Debug.DrawLine(look_ahead, enemies[i].transform.position, Color.cyan);
+            if (turrets[i] == null) continue;
+            if (!Physics.Linecast(look_ahead, turrets[i].transform.position, layerMask)) {
+                Debug.DrawLine(look_ahead, turrets[i].transform.position, Color.cyan);
                 return true;
             }
         }
