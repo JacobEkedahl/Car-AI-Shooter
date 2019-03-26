@@ -42,7 +42,7 @@ namespace UnityStandardAssets.Vehicles.Car {
             if (my_index == leaderManager.leader) { 
                 car = new LeaderCar(coordinator, m_Car, this.transform, target_handler, terrain_manager.myInfo);
             } else {
-                car = new FollowerCar(coordinator, m_Car, this.transform, target_handler, terrain_manager.myInfo);
+                car = new FollowerCar(my_index, coordinator, m_Car, this.transform, target_handler, terrain_manager.myInfo);
             }
         }
 
@@ -50,7 +50,7 @@ namespace UnityStandardAssets.Vehicles.Car {
             if (friends[leaderManager.leader-1] == null) {
                 Debug.Log("leader is gone!");
                 leaderManager.leader = my_index;
-                car = new LeaderCar(coordinator, index_assigner, my_index, m_Car, this.transform, target_handler, terrain_manager.myInfo);
+                car = new LeaderCar(coordinator, m_Car, this.transform, target_handler, terrain_manager.myInfo);
             }
         }
 

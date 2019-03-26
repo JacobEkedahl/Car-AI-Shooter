@@ -5,10 +5,11 @@ using UnityStandardAssets.Vehicles.Car;
 public class FollowerCar : MainCar {
 
     public GameObject[] friends;
-
-    public FollowerCar(Coordinator coordinator, CarController m_Car, Transform car, TargetHandler target_handler, TerrainInfo info) : base(coordinator, m_Car, car, target_handler, info) {
+    int my_index;
+    public FollowerCar(int my_index, Coordinator coordinator, CarController m_Car, Transform car, TargetHandler target_handler, TerrainInfo info) : base(coordinator, m_Car, car, target_handler, info) {
         friends = GameObject.FindGameObjectsWithTag("Player");
         collision_handling = false;
+        this.my_index = my_index;
     }
 
     public override void go() {
